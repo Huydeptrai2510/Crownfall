@@ -1001,7 +1001,6 @@
       this.fieldError('st-error', ''); this.fieldError('rpp-error', '');
     },
     renderNav() {
-      Utils.$('#nav-user').textContent = Profile.data ? '@' + Profile.data.username : '';
       Utils.$('#nav-admin').hidden = !Profile.isStaff(); Utils.$('#nav-boss').hidden = Profile.role !== 'boss';
     }
   };
