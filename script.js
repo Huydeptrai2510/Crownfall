@@ -45,7 +45,9 @@
     },
     tierImages: {                        // TÊN MẪU: ảnh bậc rank PNG 400x400, cùng thư mục với index.html (khóa = tên bậc viết thường). BẬC TỰ ĐẶT TÊN: không cần khai báo ở đây — chỉ cần file rank-<tên bỏ dấu, viết thường, không khoảng trắng>.png, vd bậc "Đồng Sắt" → rank-dongsat.png
       bronze: 'rank-bronze.png', silver: 'rank-silver.png', gold: 'rank-gold.png', platinum: 'rank-platinum.png',
-      diamond: 'rank-diamond.png', master: 'rank-master.png', grandmaster: 'rank-grandmaster.png'
+      diamond: 'rank-diamond.png', master: 'rank-master.png', grandmaster: 'rank-grandmaster.png',
+      xuanphuong: 'rank-xuanphuong.png',badinh: 'rank-badinh.png',doanthidiem: 'rank-doanthidiem.png',dongngac: 'rank-dongngac.png',
+      xuanla: 'rank-xuanla.png',
     },
     pieceImages: {                       // TÊN MẪU cho từng phe × từng quân
       red:  { soldier: 'red-soldier.png',  king: 'red-king.png',  knight: 'red-knight.png',  bishop: 'red-bishop.png',
