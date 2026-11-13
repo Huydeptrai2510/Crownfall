@@ -43,7 +43,7 @@
       soldier: 'Lính', king: 'Vua', knight: 'Mã', bishop: 'Cận',
       wolf: 'Sói', bear: 'Gấu', ox: 'Ngưu', mage: 'Thuật'
     },
-    tierImages: {                        // TÊN MẪU: ảnh bậc rank PNG 400x400, cùng thư mục với index.html (khóa = tên bậc viết thường)
+    tierImages: {                        // TÊN MẪU: ảnh bậc rank PNG 400x400, cùng thư mục với index.html (khóa = tên bậc viết thường). BẬC TỰ ĐẶT TÊN: không cần khai báo ở đây — chỉ cần file rank-<tên bỏ dấu, viết thường, không khoảng trắng>.png, vd bậc "Đồng Sắt" → rank-dongsat.png
       bronze: 'rank-bronze.png', silver: 'rank-silver.png', gold: 'rank-gold.png', platinum: 'rank-platinum.png',
       diamond: 'rank-diamond.png', master: 'rank-master.png', grandmaster: 'rank-grandmaster.png'
     },
@@ -849,7 +849,7 @@
     validate({ username, display, avatar, bio }) {
       if (!Config.USERNAME_RE.test(username)) return 'Tên người dùng gồm 3–20 ký tự: a–z, 0–9, dấu gạch dưới.';
       if (!display || display.length > 40) return 'Tên hiển thị phải từ 1 đến 40 ký tự.';
-      if (avatar && (avatar.length > 500 || !Utils.isHttps(avatar))) return 'URL ảnh đại diện phải bắt đầu bằng https://.';
+      if (!AvatarImage.ok(avatar)) return 'Ảnh đại diện không hợp lệ. Hãy chọn lại ảnh từ thiết bị.';
       if (bio.length > 280) return 'Giới thiệu tối đa 280 ký tự.';
       return '';
     },
@@ -871,18 +871,37 @@
   /* ===================================================================
    * UI
    * =================================================================== */
+  /* Ảnh đại diện: đọc file người dùng chọn, cắt vuông + thu nhỏ rồi lưu dạng data URL (không cần link ngoài). */
+  const AvatarImage = {
+    SIZE: 160,
+    async fromFile(file) {
+      if (!/^image\/(jpeg|png|webp|gif)$/.test(file.type)) throw new Error('Chỉ nhận ảnh JPG, PNG, WebP hoặc GIF.');
+      if (file.size > 10 * 1024 * 1024) throw new Error('Ảnh quá lớn (tối đa 10 MB).');
+      const url = URL.createObjectURL(file);
+      try {
+        const img = await new Promise((ok, no) => { const i = new Image(); i.onload = () => ok(i); i.onerror = () => no(new Error('Không đọc được ảnh này.')); i.src = url; });
+        const side = Math.min(img.naturalWidth, img.naturalHeight), cv = document.createElement('canvas'); cv.width = cv.height = this.SIZE;
+        cv.getContext('2d').drawImage(img, (img.naturalWidth - side) / 2, (img.naturalHeight - side) / 2, side, side, 0, 0, this.SIZE, this.SIZE);
+        let out = cv.toDataURL('image/jpeg', 0.85); if (out.length > 90000) out = cv.toDataURL('image/jpeg', 0.6);
+        if (out.length > 90000) throw new Error('Ảnh quá nặng sau khi nén, hãy chọn ảnh khác.');
+        return out;
+      } finally { URL.revokeObjectURL(url); }
+    },
+    ok(v) { return !v || (/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(v) && v.length <= 100000) || (v.length <= 500 && Utils.isHttps(v)); }
+  };
+
   const UI = {
-    screens: ['loading', 'error', 'login', 'register', 'home', 'profile', 'settings', 'play', 'modes', 'lobby', 'queue', 'friends', 'ranking', 'player', 'replay', 'admin'],
+    screens: ['loading', 'error', 'login', 'register', 'home', 'profile', 'settings', 'play', 'modes', 'lobby', 'queue', 'friends', 'ranking', 'player', 'replay', 'guide', 'admin'],
     toastTimer: null,
     show(name) {
       this.screens.forEach((s) => { const n = Utils.$('#screen-' + s); if (n) n.hidden = s !== name; });
       const bar = Utils.$('#topbar');
-      bar.hidden = !(Auth.user && ['home', 'profile', 'settings', 'play', 'modes', 'lobby', 'queue', 'friends', 'ranking', 'player', 'replay', 'admin'].includes(name));
+      bar.hidden = !(Auth.user && ['home', 'profile', 'settings', 'play', 'modes', 'lobby', 'queue', 'friends', 'ranking', 'player', 'replay', 'guide', 'admin'].includes(name));
       const navKey = { play: 'modes', lobby: 'modes', queue: 'modes', player: 'ranking', replay: 'profile' }[name] || name;
-      Utils.$$('#nav a').forEach((a) => {
+      Utils.$$('#topbar a[data-route]').forEach((a) => {
         if (a.dataset.route === navKey) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
       });
-      const t = { login: 'Đăng nhập', register: 'Đăng ký', home: 'Sảnh', profile: 'Hồ sơ', settings: 'Cài đặt', play: 'Bàn cờ', modes: 'Chơi', lobby: 'Phòng chờ', queue: 'Tìm trận', friends: 'Bạn bè', ranking: 'Xếp hạng', player: 'Hồ sơ người chơi', replay: 'Replay', admin: 'Quản trị' }[name];
+      const t = { login: 'Đăng nhập', register: 'Đăng ký', home: 'Sảnh', profile: 'Hồ sơ', settings: 'Cài đặt', play: 'Bàn cờ', modes: 'Chơi', lobby: 'Phòng chờ', queue: 'Tìm trận', friends: 'Bạn bè', guide: 'Hướng dẫn', ranking: 'Xếp hạng', player: 'Hồ sơ người chơi', replay: 'Replay', admin: 'Quản trị' }[name];
       document.title = t ? t + ' — Crownfall' : 'Crownfall';
       const main = Utils.$('#main'); if (main) main.focus({ preventScroll: true });
       window.scrollTo(0, 0);
@@ -913,7 +932,7 @@
       document.body.dataset.motion = s.reduce_motion ? 'reduced' : 'full';
     },
     renderAvatar(box, name, url) {
-      if (url && Utils.isHttps(url)) {
+      if (url && (Utils.isHttps(url) || /^data:image\/(jpeg|png|webp);base64,/.test(url))) {
         const img = Utils.el('img', { src: url, alt: '', referrerpolicy: 'no-referrer', loading: 'lazy' });
         img.addEventListener('error', () => box.replaceChildren(String(name || '?').charAt(0).toUpperCase()), { once: true });
         box.replaceChildren(img);
@@ -959,7 +978,19 @@
       Utils.$('#pf-username').value = p.username; Utils.$('#pf-username').disabled = true; Utils.$('#pf-display').value = p.display_name;
       Utils.$('#pf-avatar-url').value = p.avatar_url || ''; Utils.$('#pf-bio').value = p.bio || '';
       this.renderAvatar(Utils.$('#pf-avatar'), p.display_name, p.avatar_url);
-      this.fieldError('pf-error', '');
+      this.fieldError('pf-error', ''); this.bindAvatar();
+    },
+    bindAvatar() {
+      if (this.avBound) return; this.avBound = true;
+      const file = Utils.$('#pf-avatar-file'), url = Utils.$('#pf-avatar-url');
+      const preview = () => this.renderAvatar(Utils.$('#pf-avatar'), (Profile.data && Profile.data.display_name) || '?', url.value);
+      file.addEventListener('change', async () => {
+        const f = file.files && file.files[0]; if (!f) return;
+        try { url.value = await AvatarImage.fromFile(f); preview(); this.fieldError('pf-error', ''); UI.toast('Đã chọn ảnh. Nhấn "Lưu hồ sơ" để lưu.'); }
+        catch (e) { this.fieldError('pf-error', e.message || 'Không đọc được ảnh.'); }
+        file.value = '';
+      });
+      Utils.$('#pf-avatar-clear').addEventListener('click', () => { url.value = ''; preview(); UI.toast('Đã bỏ ảnh. Nhấn "Lưu hồ sơ" để lưu.'); });
     },
     renderSettings() {
       const s = Profile.settings;
@@ -1307,6 +1338,7 @@
         this.btn('Từ chối', 'ghost', (b) => withBusy(b, async () => { await Rpc.call('respond_friend_invite', { p_invite: i.id, p_accept: false }); await this.refresh(); }))]));
       Utils.$('#fr-invites').replaceChildren(...inv); Utils.$('#fr-invites-box').hidden = !inv.length;
       const fr = d.friends.map((x) => Utils.el('li', {}, [dot(x.online), Utils.el('span', { class: 'grow', text: who(x) }),
+        this.btn('Hồ sơ', 'ghost', () => Router.go('player', { u: x.username })),
         this.btn('Mời đấu', 'blue', (b) => withBusy(b, async () => {
           const r = await Rpc.call('invite_friend', { p_username: x.username, p_turn_seconds: 60 }); UI.toast('Đã gửi lời mời cho @' + x.username + '.'); Router.go('lobby', { r: r.room.id }); }))]));
       Utils.$('#fr-list').replaceChildren(...fr); Utils.$('#fr-empty').hidden = !!fr.length;
@@ -1683,7 +1715,7 @@
       let name = ''; for (const t of this.tiers) if (rating >= t.min) name = t.name; return name;
     },
     badge(name, big) {
-      const key = String(name || '').toLowerCase().replace(/[^a-z0-9]/g, ''), A = ASSET_CONFIG, file = A.enabled && A.tierImages[key];
+      const key = String(name || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/gi, 'd').toLowerCase().replace(/[^a-z0-9]/g, ''), A = ASSET_CONFIG, file = A.enabled && key && (A.tierImages[key] || ('rank-' + key + '.png'));
       const kids = [];
       if (file) { const img = Utils.el('img', { class: 'tier-img', src: A.basePath + file, alt: '', width: '400', height: '400', loading: 'lazy' }); img.addEventListener('error', () => img.remove()); kids.push(img); }
       kids.push(Utils.el('span', { text: name || 'Chưa xếp hạng' }));
@@ -1764,24 +1796,13 @@
         this.stat('Tỷ lệ thắng', r.win_rate === null ? '— (cần ≥ 5 trận)' : Fmt.pct(r.win_rate)), this.stat('HELO cao nhất', r.peak)]));
       nodes.push(Utils.el('h2', { text: 'Thành tích' }));
       nodes.push(d.achievements.length ? Utils.el('div', { class: 'chips' }, d.achievements.map((a) => Utils.el('span', { class: 'chip', text: a.label }))) : Fmt.empty('Chưa có thành tích. Thành tích được tính từ số liệu Ranked thật.'));
-      nodes.push(Utils.el('h2', { text: 'Lịch sử HELO' }), Utils.el('div', { id: boxId + '-elo' }, [Fmt.empty('Đang tải…')]));
-      nodes.push(Utils.el('h2', { text: 'Lịch sử trận' }), Utils.el('ul', { id: boxId + '-matches', class: 'list match-list' }), Utils.el('div', { class: 'row' }, [Utils.el('button', { id: boxId + '-more', type: 'button', class: 'btn btn-ghost btn-sm', text: 'Xem thêm' })]));
+            nodes.push(Utils.el('h2', { text: '3 trận gần nhất' }), Utils.el('ul', { id: boxId + '-matches', class: 'list match-list' }));
       box.replaceChildren(...nodes);
       this.renderMatches(boxId);
-      Utils.$('#' + boxId + '-more').addEventListener('click', (ev) => withBusy(ev.currentTarget, () => this.more(boxId)));
-      try {
-        const h = await Rpc.call('get_rating_history', { p_user: d.user_id, p_limit: 30 }); if (!Utils.$('#' + boxId + '-elo')) return;
-        Utils.$('#' + boxId + '-elo').replaceChildren(h.events.length ? Utils.el('ul', { class: 'list elo-list' }, h.events.map((e) => Utils.el('li', {}, [
-          Utils.el('span', { class: 'muted small', text: Fmt.dt(e.created_at) }), Utils.el('span', { text: Fmt.result(e.result) + (e.opponent ? ' vs @' + e.opponent : '') }),
-          Utils.el('span', { class: 'muted', text: e.before + ' → ' + e.after }), Utils.el('strong', { class: e.delta > 0 ? 'pos' : e.delta < 0 ? 'neg' : '', text: Fmt.delta(e.delta) }),
-          Utils.el('span', { class: 'bar ' + (e.delta >= 0 ? 'pos' : 'neg'), style: 'width:' + Math.min(100, Math.max(4, Math.abs(e.delta) * 3)) + 'px' })])))
-          : Fmt.empty('Chưa có biến động HELO (chưa có trận Ranked nào kết thúc).'));
-      } catch (e) { const n = Utils.$('#' + boxId + '-elo'); if (n) n.replaceChildren(Fmt.empty(Utils.mapError(e))); }
     },
     renderMatches(boxId) {
       const S = this.st[boxId], d = S.d, ul = Utils.$('#' + boxId + '-matches'); if (!ul) return;
       ul.replaceChildren(...(S.matches.length ? S.matches.map((m) => this.matchRow(boxId, d, m)) : [Utils.el('li', {}, [Fmt.empty(d.is_me ? 'Chưa có trận nào kết thúc.' : 'Chưa có trận Ranked công khai.')])]));
-      Utils.$('#' + boxId + '-more').hidden = S.matches.length === 0 || S.matches.length % 20 !== 0;
     },
     matchRow(boxId, d, m) {
       const acts = [];
@@ -1980,7 +2001,7 @@
         b.setAttribute('aria-label', (p ? PIECE_TYPES[p.type].name + ' ' + p.owner + ', ' : 'Ô trống, ') + 'hàng ' + (r + 1) + ' cột ' + (c + 1));
       });
       Utils.$('#rp-range').value = String(this.idx);
-      Utils.$$('#rp-moves .mv').forEach((n, i) => { const on = i + 1 === this.idx; n.classList.toggle('cur', on); if (on) n.scrollIntoView({ block: 'nearest' }); });
+      Utils.$$('#rp-moves .mv').forEach((n, i) => { const on = i + 1 === this.idx; n.classList.toggle('cur', on); if (on) { let sc = n.parentElement; while (sc && sc !== document.body && !/(auto|scroll)/.test(getComputedStyle(sc).overflowY)) sc = sc.parentElement; if (sc && sc !== document.body && sc.scrollHeight > sc.clientHeight) sc.scrollTop += n.getBoundingClientRect().top - sc.getBoundingClientRect().top - (sc.clientHeight - n.offsetHeight) / 2; } });
       Utils.$('#rp-pos').textContent = 'Nước ' + this.idx + ' / ' + (this.frames.length - 1);
       const m = this.data.match, box = Utils.$('#rp-info');
       if (!mv) box.replaceChildren(Utils.el('p', { text: 'Vị trí ban đầu.' }));
@@ -2164,8 +2185,180 @@
   /* ===================================================================
    * ROUTER (hash). Trang cần đăng nhập bị chặn khi chưa có phiên.
    * =================================================================== */
+  /* ===================================================================
+   * HƯỚNG DẪN — bàn cờ minh họa + hoạt ảnh dựng bằng code (không video, không AI)
+   * Mỗi bước (step) là một "khung hình" đầy đủ: quân + ô nổi bật. Tự lặp lại khi đang ở màn hình này.
+   * Khóa đánh dấu: mv=ô đi được, cp=ô ăn được, bad=không hợp lệ, fb=Đường Cấm, ln=đường hỗ trợ/liên kết,
+   *                sp=quân được tô sáng, sw=hai quân đổi chỗ, ck=Vua bị chiếu, a=ô đến (trượt), x=ô quân bị bắt (nháy).
+   * ASSUMPTION: lãnh thổ P1 = hàng 1–4, P2 = hàng 6–9, hàng 5 là biên giới (A1 của engine).
+   * =================================================================== */
+  const Guide = (() => {
+    const P = (t, s, r, c) => ({ t, s: s === 'R' ? 'red' : 'blue', r, c });
+    const inb = (r, c) => r >= 0 && r < SIZE && c >= 0 && c < SIZE;
+    const ring = (r, c, n) => { const o = []; for (let i = -n; i <= n; i++) for (let j = -n; j <= n; j++) if ((i || j) && inb(r + i, c + j)) o.push([r + i, c + j]); return o; };
+    const D8 = [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, -1], [1, 0], [1, 1]], D4 = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+    const slide = (pcs, p, dirs, max) => {
+      const mv = [], cp = [], at = (r, c) => pcs.find((q) => q.r === r && q.c === c);
+      dirs.forEach(([dr, dc]) => { for (let k = 1; k <= max; k++) { const r = p.r + dr * k, c = p.c + dc * k; if (!inb(r, c)) break; const q = at(r, c); if (q) { if (q.s !== p.s) cp.push([r, c]); break; } mv.push([r, c]); } });
+      return { mv, cp };
+    };
+    const not = (list, ...cells) => list.filter(([r, c]) => !cells.some(([a, b]) => a === r && b === c));
+    const row = (r, c1, c2) => { const o = []; for (let c = c1; c <= c2; c++) o.push([r, c]); return o; };
+    const SC = {};
+    const slider = (t, extra) => { const m = P(t, 'R', 6, 4), al = P('L', 'R', 6, 6), en = P('L', 'B', 3, 4), all = [m, al, en];
+      return [{ p: [m], ...slide([m], m, D8, 9), cap: 'Đi nhiều ô theo một đường thẳng: ngang, dọc hoặc chéo.' },
+        { p: all, ...slide(all, m, D8, 9), cap: 'Không xuyên qua quân khác; gặp quân địch thì được ăn tại ô đó.' },
+        { p: [P(t, 'R', 3, 4), al], f: [6, 4], a: [3, 4], x: [[3, 4]], cap: extra }]; };
+    SC.M = slider('M', 'Mã ăn quân tại ô đến. Mã và Ngưu cùng hàng/cột tạo Đường Cấm (xem bài Đường Cấm).');
+    SC.C = slider('C', 'Cận ăn quân tại ô đến hợp lệ.');
+    { const L = P('L', 'R', 6, 4), blk = P('L', 'R', 5, 4), a1 = P('L', 'R', 5, 3), a2 = P('L', 'R', 5, 5), e = P('M', 'B', 4, 4);
+      SC.L = [{ p: [L], mv: ring(6, 4, 2), cap: 'Lính đi tối đa 2 ô theo ngang, dọc hoặc chéo.' },
+        { p: [L, blk], ...slide([L, blk], L, D8, 2), cap: 'Không được xuyên qua quân khác: phía trên bị chặn.' },
+        { p: [L, a1, a2, e], sp: [[5, 3], [5, 5]], cp: [[4, 4]], cap: 'Mục tiêu có ít nhất 2 đồng minh xung quanh → Lính được ăn.' },
+        { p: [P('L', 'R', 4, 4), a1, a2], f: [6, 4], a: [4, 4], x: [[4, 4]], cap: 'Lính ăn quân; quân bị bắt biến mất.' },
+        { p: [L, a1, e], sp: [[5, 3]], bad: [[4, 4]], cap: 'Chỉ có 1 đồng minh quanh mục tiêu → chưa được ăn (trừ khi có Thuật hỗ trợ).' }]; }
+    { const V = P('V', 'R', 7, 4), e = P('L', 'B', 6, 4), t = P('T', 'R', 7, 6);
+      SC.V = [{ p: [V], mv: ring(7, 4, 1), cap: 'Vua đi 1 ô theo 8 hướng.' },
+        { p: [V, e], mv: not(ring(7, 4, 1), [6, 4]), bad: [[6, 4]], cap: 'Bình thường Vua không thể ăn quân.' },
+        { p: [V, e, t], sp: [[7, 4], [7, 6]], ln: [[7, 5]], mv: not(ring(7, 4, 1), [6, 4]), cp: [[6, 4]], cap: 'Có Thuật hỗ trợ (cùng hàng), Vua ăn được trong phạm vi 1 ô.' },
+        { p: [V], ck: [[7, 4]], cap: 'Vua bị bắt đồng nghĩa với thua cuộc. Hãy bảo vệ Vua!' }]; }
+    { const S = P('S', 'R', 6, 4), e1 = P('L', 'B', 5, 4), e2 = P('L', 'B', 4, 4);
+      SC.S = [{ p: [S], mv: ring(6, 4, 2), cap: 'Sói đi trong vùng 5×5 quanh nó và có thể nhảy qua quân khác.' },
+        { p: [S, e1, e2], mv: not(ring(6, 4, 2), [5, 4], [4, 4]), cp: [[4, 4]], bad: [[5, 4]], cap: 'Bình thường Sói chỉ ăn quân cách đúng 2 ô; quân sát bên không ăn được.' },
+        { p: [P('S', 'R', 4, 4), e1], f: [6, 4], a: [4, 4], x: [[4, 4]], cap: 'Sói nhảy qua quân chắn và ăn mục tiêu cách 2 ô.' }]; }
+    { const G = P('G', 'R', 4, 4), e = P('L', 'B', 4, 5);
+      SC.G = [{ p: [G], mv: [[3, 4], [5, 4], [4, 3], [4, 5]], cap: 'Gấu đi 1 ô ngang hoặc dọc.' },
+        { p: [G, e], mv: [[3, 4], [5, 4], [4, 3]], cp: [[4, 5]], cap: 'Đứng ở hàng biên giới, Gấu được ăn quân.' },
+        { p: [P('G', 'R', 4, 5)], f: [4, 4], a: [4, 5], x: [[4, 5]], cap: 'Gấu ăn quân ngay trên hàng biên giới.' },
+        { p: [P('G', 'R', 6, 4), P('L', 'B', 5, 4)], mv: [[7, 4], [6, 3], [6, 5]], bad: [[5, 4]], cap: 'Rời biên giới: Gấu không thể ăn (và cũng không thể bị bắt).' }]; }
+    { const N = P('N', 'R', 6, 4), blk = P('L', 'R', 5, 4), e = P('L', 'B', 6, 6), all = [N, blk, e];
+      SC.N = [{ p: [N], ...slide([N], N, D4, 2), cap: 'Ngưu đi tối đa 2 ô ngang hoặc dọc.' },
+        { p: all, ...slide(all, N, D4, 2), cap: 'Không xuyên qua quân khác; ăn quân ở ô đến hợp lệ.' },
+        { p: [P('N', 'R', 6, 6), blk], f: [6, 4], a: [6, 6], x: [[6, 6]], cap: 'Ngưu ăn quân. Ngưu phối hợp với Mã để tạo Đường Cấm.' }]; }
+    { const T = P('T', 'R', 7, 3), t2 = P('T', 'R', 7, 6);
+      SC.T = [{ p: [T], mv: [[6, 3], [8, 3], [7, 2], [7, 4]], cap: 'Thuật đi 1 ô ngang hoặc dọc, chỉ trong lãnh thổ phe mình.' },
+        { p: [P('T', 'R', 5, 3)], mv: [[6, 3], [5, 2], [5, 4]], bad: [[4, 3]], cap: 'Không được bước ra hàng biên giới hay lãnh thổ địch.' },
+        { p: [T, t2], sp: [[7, 3], [7, 6]], ln: row(7, 4, 5), cap: 'Hai Thuật cùng hàng hoặc cột tạo thành Cặp Thuật.' }]; }
+    { const M = P('M', 'R', 6, 2), N = P('N', 'R', 6, 6), e = P('C', 'B', 3, 4), z = [[6, 3], [6, 4], [6, 5]];
+      SC.FB = [{ p: [M, N], sp: [[6, 2], [6, 6]], fb: z, cap: 'Mã và Ngưu cùng hàng: các ô giữa hai quân là Đường Cấm.' },
+        { p: [M, N, e], sp: [[6, 2], [6, 6]], fb: z, mv: [[4, 4], [5, 4]], bad: [[6, 4]], cap: 'Đối phương không thể đi vào hay xuyên qua Đường Cấm.' },
+        { p: [P('M', 'R', 5, 2), N, e], f: [6, 2], a: [5, 2], mv: [[4, 4], [5, 4], [6, 4], [7, 4], [8, 4]], cap: 'Mã rời hàng → Đường Cấm biến mất, quân địch đi qua được.' },
+        { p: [M, N, e], f: [5, 2], a: [6, 2], sp: [[6, 2], [6, 6]], fb: z, bad: [[6, 4]], cap: 'Mã quay lại cùng hàng → Đường Cấm xuất hiện lại.' }]; }
+    { const bd = row(4, 0, 8);
+      SC.BG = [{ p: [P('G', 'R', 6, 4), P('C', 'B', 6, 7)], bad: [[6, 4]], ln: bd, cap: 'Gấu ngoài biên giới không thể bị ăn: Cận địch không bắt được.' },
+        { p: [P('G', 'R', 4, 4), P('C', 'B', 4, 8)], ln: bd, cp: [[4, 4]], mv: [[4, 5], [4, 6], [4, 7]], cap: 'Đứng trên biên giới, Gấu có thể bị ăn.' },
+        { p: [P('G', 'R', 4, 4), P('L', 'B', 4, 3)], ln: bd, cp: [[4, 3]], cap: 'Đứng trên biên giới, Gấu cũng có thể ăn quân.' }]; }
+    { const t1 = P('T', 'R', 7, 2), t2 = P('T', 'R', 7, 6), e = P('L', 'B', 6, 2), c = P('C', 'B', 3, 2), ln = row(7, 3, 5);
+      SC.PT = [{ p: [t1, t2], sp: [[7, 2], [7, 6]], ln, cap: 'Hai Thuật cùng hàng: Cặp Thuật hoạt động.' },
+        { p: [t1, t2, e, c], sp: [[7, 2], [7, 6]], ln, cp: [[6, 2]], cap: 'Cặp Thuật cho phép Thuật ăn quân.' },
+        { p: [P('T', 'R', 6, 2), t2, c], f: [7, 2], a: [6, 2], x: [[6, 2]], cap: 'Thuật ăn quân đối phương.' },
+        { p: [P('C', 'B', 6, 2)], f: [3, 2], a: [6, 2], x: [[6, 2], [7, 6]], cap: 'Một Thuật bị bắt → Thuật còn lại cùng phe cũng bị loại bỏ.' }]; }
+    { const T = P('T', 'R', 7, 4), l = P('L', 'R', 7, 1), v = P('V', 'R', 7, 7), s = P('S', 'R', 5, 4), ln = [[7, 2], [7, 3], [7, 5], [7, 6], [6, 4]], em = P('M', 'B', 5, 3);
+      SC.SUP = [{ p: [T, l, v, s], sp: [[7, 1], [7, 7], [5, 4]], ln, cap: 'Thuật hỗ trợ quân đồng minh nằm cùng hàng hoặc cùng cột.' },
+        { p: [T, l, em], sp: [[7, 1]], ln: row(7, 2, 3), cp: [[5, 3]], cap: 'Lính được hỗ trợ: bỏ qua điều kiện 2 đồng minh quanh mục tiêu.' },
+        { p: [T, P('L', 'R', 5, 3)], f: [7, 1], a: [5, 3], x: [[5, 3]], cap: 'Lính ăn quân dù chỉ có một mình.' },
+        { p: [T, v, P('L', 'B', 6, 7)], sp: [[7, 7]], ln: row(7, 5, 6), cp: [[6, 7]], cap: 'Vua được hỗ trợ có thể ăn quân trong phạm vi 1 ô.' },
+        { p: [T, s, P('L', 'B', 5, 5)], sp: [[5, 4]], ln: [[6, 4]], cp: [[5, 5]], cap: 'Sói được hỗ trợ ăn mọi ô trong phạm vi, không cần cách đúng 2 ô.' },
+        { p: [T, v, P('L', 'B', 5, 7)], sp: [[7, 7]], ln: row(7, 5, 6), bad: [[5, 7]], cap: 'Thuật không làm tăng phạm vi di chuyển: Vua vẫn chỉ với tới 1 ô.' }]; }
+    { const V = P('V', 'R', 7, 4), T = P('T', 'R', 6, 4);
+      SC.SW = [{ p: [V, T], sw: [[7, 4], [6, 4]], cap: 'Vua và Thuật cùng phe có thể đổi chỗ — tính là một lượt.' },
+        { p: [P('V', 'R', 6, 4), P('T', 'R', 7, 4)], sw: [[7, 4], [6, 4]], sa: 1, cap: 'Hai quân hoán vị. Hợp lệ vì Thuật vẫn nằm trong lãnh thổ và Vua không bị chiếu.' },
+        { p: [P('V', 'R', 4, 4), T], sw: [[4, 4], [6, 4]], bad: [[4, 4]], cap: 'Không hợp lệ: Thuật sẽ phải đứng ngoài lãnh thổ (hàng biên giới).' },
+        { p: [V, P('T', 'R', 7, 1), P('C', 'B', 3, 1)], sw: [[7, 4], [7, 1]], bad: [[7, 1]], ln: [[4, 1], [5, 1], [6, 1]], cap: 'Không hợp lệ: sau khi đổi, Vua đứng cùng cột với Cận địch và vẫn bị chiếu.' }]; }
+    const startPieces = () => { const o = []; try { const b = GameState.create().board; for (let r = 0; r < SIZE; r++) for (let c = 0; c < SIZE; c++) { const p = b[r][c]; if (p) o.push({ t: p.type, s: FACTION[p.owner] || (p.owner === 'P1' ? 'blue' : 'red'), r, c }); } } catch (e) { /* bỏ qua */ } return o; };
+    const scene = (k) => (k === 'START' ? [{ p: startPieces(), ln: row(4, 0, 8), cap: 'Bàn cờ 9×9. Hàng giữa là biên giới; mỗi phe giữ một nửa bàn.' }] : SC[k]);
+    const PI = {
+      L: ['Lính', ['Quân tiên phong, cần đồng đội để ăn.', 'Đi tối đa 2 ô: ngang, dọc, chéo; không xuyên quân.', 'Ăn khi có ≥ 2 đồng minh quanh mục tiêu.', 'Có Thuật hỗ trợ: bỏ điều kiện 2 đồng minh.']],
+      V: ['Vua', ['Quân quyết định thắng thua.', 'Đi 1 ô theo 8 hướng.', 'Bình thường không ăn quân; có Thuật hỗ trợ thì ăn được.', 'Vua bị bắt = thua.']],
+      M: ['Mã', ['Quân trượt xa.', 'Đi nhiều ô theo đường thẳng (ngang, dọc, chéo), không xuyên quân.', 'Ăn quân tại ô đến hợp lệ.', 'Cùng hàng/cột với Ngưu → Đường Cấm.']],
+      C: ['Cận', ['Quân trượt xa.', 'Đi nhiều ô theo đường thẳng (ngang, dọc, chéo), không xuyên quân.', 'Ăn quân tại ô đến hợp lệ.']],
+      S: ['Sói', ['Quân nhảy.', 'Đi trong vùng 5×5, nhảy qua quân khác.', 'Thường chỉ ăn quân cách đúng 2 ô (theo hàng/cột lớn nhất).', 'Có Thuật hỗ trợ: ăn mọi ô hợp lệ trong vùng.']],
+      G: ['Gấu', ['Quân biên giới.', 'Đi 1 ô ngang hoặc dọc.', 'Chỉ ăn và chỉ bị ăn khi đứng ở hàng biên giới.']],
+      N: ['Ngưu', ['Quân tiến nhanh.', 'Đi tối đa 2 ô ngang hoặc dọc, không xuyên quân.', 'Ăn quân tại ô đến hợp lệ.', 'Phối hợp với Mã tạo Đường Cấm.']],
+      T: ['Thuật', ['Quân hỗ trợ.', 'Đi 1 ô ngang hoặc dọc, chỉ trong lãnh thổ phe mình.', 'Hai Thuật cùng hàng/cột = Cặp Thuật (Thuật được ăn quân).', 'Một Thuật bị bắt → Thuật còn lại bị loại.', 'Hỗ trợ đồng minh cùng hàng/cột.']]
+    };
+    const LS = { FB: ['Đường Cấm', ['Mã và Ngưu cùng hàng/cột → các ô giữa là Đường Cấm.', 'Đối phương không đi vào hay xuyên qua được.']], BG: ['Biên giới Gấu', ['Ngoài biên giới: Gấu không ăn, không bị ăn.', 'Trên biên giới: ăn được và bị ăn được.']],
+      PT: ['Cặp Thuật', ['Hai Thuật cùng hàng/cột cho phép Thuật ăn quân.', 'Một Thuật bị bắt → Thuật còn lại cũng bị loại.']], SUP: ['Thuật hỗ trợ', ['Hỗ trợ đồng minh cùng hàng/cột.', 'Không tăng phạm vi di chuyển.']],
+      SW: ['Đổi chỗ Vua–Thuật', ['Vua và Thuật cùng phe hoán đổi vị trí.', 'Không hợp lệ nếu Thuật ra ngoài lãnh thổ hoặc Vua vẫn bị chiếu.']] };
+    const cnt = () => { const m = {}; startPieces().filter((p) => p.s === 'red').forEach((p) => { m[p.t] = (m[p.t] || 0) + 1; }); return Object.keys(PI).filter((k) => m[k]).map((k) => PI[k][0] + ' ×' + m[k]).join(', '); };
+    const GS = [
+      ['Mục tiêu', 'Bắt Vua đối phương, hoặc khiến đối phương không còn nước đi hợp lệ.', 'START', 0],
+      ['Bàn cờ', 'Bàn 9×9. Mỗi phe giữ một lãnh thổ, hàng giữa là biên giới.', 'START', 0],
+      ['Quân cờ', 'Mỗi phe có 8 loại quân: ', 'START', 0],
+      ['Bắt đầu ván', 'Phe 2 (Đỏ) đi trước, sau đó hai phe luân phiên.', 'START', 0],
+      ['Thực hiện lượt', 'Mỗi lượt: di chuyển một quân, ăn quân nếu đủ điều kiện, hoặc đổi chỗ Vua–Thuật.', 'SW', 0],
+      ['Di chuyển', 'Mỗi quân có phạm vi và quy tắc đường đi riêng. Ví dụ: Mã trượt thẳng, không xuyên quân.', 'M', 0],
+      ['Ăn quân', 'Điều kiện ăn khác nhau theo từng quân. Ví dụ: Lính cần ≥ 2 đồng minh quanh mục tiêu.', 'L', 2],
+      ['Luật đặc biệt', 'Đường Cấm, Biên giới Gấu, Cặp Thuật, Thuật hỗ trợ và đổi chỗ Vua–Thuật. Chọn từng bài ở trên.', 'FB', 0],
+      ['Chiếu & bảo vệ Vua', 'Không được đi nước khiến Vua phe mình bị chiếu — kể cả khi đổi chỗ Vua–Thuật.', 'SW', 3],
+      ['Kết thúc', 'Ván kết thúc khi Vua bị bắt hoặc bên đến lượt không còn nước đi hợp lệ.', 'V', 3]
+    ];
+    const TIPS = ['Dùng Mã và Ngưu để kiểm soát ô bằng Đường Cấm.', 'Dùng Thuật hỗ trợ Lính, Vua và Sói.', 'Dùng Gấu để kiểm soát hàng biên giới.', 'Bảo vệ cả hai Thuật để giữ Cặp Thuật.', 'Cân nhắc vị trí Vua–Thuật để tận dụng việc đổi chỗ.'];
+    const MK = { mv: 't-move', cp: 't-capture', bad: 'g-bad', fb: 'g-forbid', ln: 'g-line', sp: 'supported', sw: 't-swap', ck: 'in-check' };
+    const G = { cells: [], steps: [], idx: 0, timer: null, playing: true, inited: false, gi: 0,
+      init() {
+        if (this.inited) return; this.inited = true;
+        const board = Utils.$('#gd-board'), frag = document.createDocumentFragment();
+        for (let r = 0; r < SIZE; r++) for (let c = 0; c < SIZE; c++) { const b = Utils.el('div', { class: 'cell ro', role: 'gridcell' }); b.dataset.co = (r + 1) + '.' + (c + 1); this.cells.push(b); frag.append(b); }
+        board.append(frag);
+        const A = ASSET_CONFIG, pb = Utils.$('#gd-pieces');
+        Object.keys(PI).forEach((k) => { const tp = PIECE_TYPES[k];
+          const b = Utils.el('button', { type: 'button', class: 'gd-piece', 'aria-pressed': 'false', 'data-k': k }, [Utils.el('span', { class: 'piece f-red' }, [AssetConfig.node(A.pieceImages.red[tp.key], k, tp.name)]), Utils.el('strong', { text: tp.name }), Utils.el('small', { text: '(' + k + ')' })]);
+          b.addEventListener('click', () => this.pick(k, PI[k][0] + ' (' + k + ')', PI[k][1], b)); pb.append(b); });
+        const lb = Utils.$('#gd-lessons');
+        Object.keys(LS).forEach((k) => { const b = Utils.el('button', { type: 'button', class: 'btn btn-ghost', 'aria-pressed': 'false', text: LS[k][0] }); b.addEventListener('click', () => this.pick(k, LS[k][0], LS[k][1], b)); lb.append(b); });
+        Utils.$('#gd-tips').replaceChildren(...TIPS.map((t) => Utils.el('li', { text: t })));
+        const on = (id, fn) => Utils.$('#' + id).addEventListener('click', fn);
+        on('gd-prev', () => { this.stop(); this.show(this.idx - 1); }); on('gd-next', () => { this.stop(); this.show(this.idx + 1); });
+        on('gd-play', () => (this.playing ? this.stop() : this.start())); on('gd-restart', () => { this.idx = 0; this.show(0); this.start(); });
+        on('gd-gprev', () => this.guide(this.gi - 1)); on('gd-gnext', () => this.guide(this.gi + 1));
+      },
+      mark(btn) { Utils.$$('#gd-pieces .gd-piece, #gd-lessons .btn').forEach((b) => b.setAttribute('aria-pressed', b === btn ? 'true' : 'false')); },
+      pick(k, title, rules, btn) { this.mark(btn); this.load(k, title, rules, 0); },
+      guide(i) {
+        this.gi = Math.max(0, Math.min(GS.length - 1, i)); const g = GS[this.gi]; this.mark(null);
+        Utils.$('#gd-step-title').textContent = 'Bước ' + (this.gi + 1) + '/' + GS.length + ' · ' + g[0];
+        Utils.$('#gd-step-text').textContent = g[1] + (this.gi === 2 ? cnt() + '.' : ''); Utils.$('#gd-gpos').textContent = (this.gi + 1) + ' / ' + GS.length;
+        this.load(g[2], 'Bước ' + (this.gi + 1) + ': ' + g[0], [g[1] + (this.gi === 2 ? cnt() + '.' : '')], g[3]);
+      },
+      load(k, title, rules, at) {
+        this.steps = scene(k) || []; this.idx = 0; Utils.$('#gd-title').textContent = title;
+        Utils.$('#gd-rules').replaceChildren(...rules.map((t) => Utils.el('li', { text: t })));
+        this.idx = at || 0; this.show(this.idx); this.start();
+      },
+      fx(s, prev, at) {
+        if (!prev || window.matchMedia('(prefers-reduced-motion: reduce)').matches || (Profile.settings && Profile.settings.reduce_motion)) return;
+        const glide = (to, from) => { const el = at(to[0], to[1]).querySelector('.piece'); if (!el) return; const a = at(from[0], from[1]).getBoundingClientRect(), b = at(to[0], to[1]).getBoundingClientRect();
+          el.style.zIndex = 6; el.animate([{ transform: 'translate(' + (a.left - b.left) + 'px,' + (a.top - b.top) + 'px)' }, { transform: 'none' }], { duration: 850, easing: 'ease-in-out' }); };
+        if (s.f && s.a) glide(s.a, s.f);
+        if (s.sa && s.sw) { glide(s.sw[0], s.sw[1]); glide(s.sw[1], s.sw[0]); }
+        (s.x || []).forEach(([r, c]) => { const q = (prev.p || []).find((p) => p.r === r && p.c === c); if (!q) return; const tp = PIECE_TYPES[q.t];
+          const gh = Utils.el('span', { class: 'piece f-' + q.s + ' gd-ghost' }, [AssetConfig.node(ASSET_CONFIG.pieceImages[q.s][tp.key], q.t, tp.name)]); at(r, c).append(gh);
+          gh.animate([{ opacity: 1, transform: 'scale(1)' }, { opacity: 1, transform: 'scale(1)', offset: 0.55 }, { opacity: 0, transform: 'scale(.4)' }], { duration: 1000, fill: 'forwards' }).onfinish = () => gh.remove(); });
+      },
+      show(i) {
+        if (!this.steps.length) return; const prevIdx = this.idx, prevSteps = this.steps; this.idx = (i + this.steps.length) % this.steps.length; const s = this.steps[this.idx];
+        this.cells.forEach((b, n) => { const r = Math.floor(n / SIZE); b.className = 'cell ro ' + (r === BORDER_ROW ? 'terr-border' : (r < BORDER_ROW ? 'terr-p1' : 'terr-p2')); b.replaceChildren(); });
+        const at = (r, c) => this.cells[r * SIZE + c], A = ASSET_CONFIG;
+        (s.p || []).forEach((p) => { const tp = PIECE_TYPES[p.t]; at(p.r, p.c).append(Utils.el('span', { class: 'piece f-' + p.s }, [AssetConfig.node(A.pieceImages[p.s][tp.key], p.t, tp.name + ' ' + (p.s === 'red' ? 'Đỏ' : 'Xanh'))])); });
+        Object.keys(MK).forEach((k) => (s[k] || []).forEach(([r, c]) => at(r, c).classList.add(MK[k])));
+        if (s.a) at(s.a[0], s.a[1]).classList.add('anim-move'); (s.x || []).forEach(([r, c]) => at(r, c).classList.add('g-flash'));
+        if (s.sa) (s.sw || []).forEach(([r, c]) => at(r, c).classList.add('anim-swap'));
+        this.fx(s, this.idx === prevIdx + 1 && prevSteps === this.steps ? prevSteps[prevIdx] : null, at);
+        const bar = Utils.$('#gd-bar-fill'); if (bar) bar.style.width = ((this.idx + 1) / this.steps.length * 100) + '%';
+        Utils.$('#gd-cap').textContent = s.cap || ''; Utils.$('#gd-pos').textContent = 'Bước ' + (this.idx + 1) + ' / ' + this.steps.length + (this.playing ? ' · tự động lặp lại' : ' · đã tạm dừng');
+        Utils.$('#gd-play').textContent = this.playing ? 'Tạm dừng' : 'Phát';
+      },
+      start() { this.stop(true); this.playing = true; Utils.$('#gd-play').textContent = 'Tạm dừng'; const t = () => { this.timer = setTimeout(() => { this.show(this.idx + 1); t(); }, this.idx === this.steps.length - 1 ? 3000 : 2600); }; if (this.steps.length > 1) t(); },
+      stop(keep) { clearTimeout(this.timer); this.timer = null; if (!keep) { this.playing = false; Utils.$('#gd-play').textContent = 'Phát'; Utils.$('#gd-pos').textContent = 'Bước ' + (this.idx + 1) + ' / ' + this.steps.length + ' · đã tạm dừng'; } },
+      enter() { this.init(); this.guide(0); },
+      leave() { clearTimeout(this.timer); this.timer = null; }
+    };
+    return G;
+  })();
+
   const Router = {
-    PUBLIC: ['login', 'register'], PROTECTED: ['home', 'profile', 'settings', 'play', 'modes', 'lobby', 'queue', 'friends', 'match', 'ranking', 'player', 'replay', 'admin', 'boss'],
+    PUBLIC: ['login', 'register'], PROTECTED: ['home', 'profile', 'settings', 'play', 'modes', 'lobby', 'queue', 'friends', 'match', 'ranking', 'player', 'replay', 'guide', 'admin', 'boss'],
     current() { const r = (location.hash || '').replace(/^#\/?/, '').split(/[?#]/)[0]; return r || ''; },
     param(k) { const q = (location.hash.split('?')[1] || '').split('#')[0]; return new URLSearchParams(q).get(k); },
     go(route, params) {
@@ -2182,7 +2375,7 @@
       if (this.PUBLIC.includes(r) && authed) r = 'home';
       if (this.current() !== r) { history.replaceState(null, '', '#/' + r); }
       if ((r === 'admin' && authed && !Profile.isStaff()) || (r === 'boss' && authed && Profile.role !== 'boss')) r = 'home';   // chỉ tiện UI; RPC vẫn kiểm role ở database
-      Poller.stopAll(); Queue.leave(); Match.leave(); Replay.leave();   // mỗi màn hình tự bật vòng poll của nó; không bao giờ có vòng trùng
+      Poller.stopAll(); Queue.leave(); Match.leave(); Replay.leave(); Guide.leave();   // mỗi màn hình tự bật vòng poll của nó; không bao giờ có vòng trùng
       if (r === 'home') UI.renderHome();
       if (r === 'profile') UI.renderProfile();
       if (r === 'settings') UI.renderSettings();
@@ -2195,6 +2388,7 @@
         if (r === 'ranking') Ranking.enter();
         if (r === 'player') Player.enterRoute();
         if (r === 'replay') Replay.enter(this.param('m'));
+        if (r === 'guide') Guide.enter();
         if (r === 'admin' || r === 'boss') Admin.enter(r);
         if (r === 'home' || r === 'friends' || r === 'modes') Social.start();
         if (r === 'modes') App.showResume();
