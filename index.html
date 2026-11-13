@@ -63,13 +63,18 @@
   <nav id="nav" class="nav" aria-label="Điều hướng chính">
     <a href="#/home" data-route="home"><span class="nav-ico"><svg class="ico" aria-hidden="true"><use href="#i-home"/></svg></span><span>Sảnh</span></a>
     <a href="#/modes" data-route="modes"><span class="nav-ico"><svg class="ico" aria-hidden="true"><use href="#i-swords"/></svg></span><span>Chơi</span></a>
-    <a href="#/ranking" data-route="ranking"><span class="nav-ico"><svg class="ico" aria-hidden="true"><use href="#i-trophy"/></svg></span><span>Xếp hạng</span></a>
+    <a class="desk-only" href="#/ranking" data-route="ranking"><span class="nav-ico"><svg class="ico" aria-hidden="true"><use href="#i-trophy"/></svg></span><span>Xếp hạng</span></a>
     <a href="#/friends" data-route="friends"><span class="nav-ico"><svg class="ico" aria-hidden="true"><use href="#i-users"/></svg></span><span>Bạn bè</span><span id="nav-friends-badge" class="badge" hidden></span></a>
     <a href="#/profile" data-route="profile"><span class="nav-ico"><svg class="ico" aria-hidden="true"><use href="#i-user"/></svg></span><span>Hồ sơ</span></a>
-    <a href="#/settings" data-route="settings"><span class="nav-ico"><svg class="ico" aria-hidden="true"><use href="#i-sliders"/></svg></span><span>Cài đặt</span></a>
+    <a href="#/guide" data-route="guide"><span class="nav-ico"><svg class="ico" aria-hidden="true"><use href="#i-shield"/></svg></span><span>Hướng dẫn</span></a>
+    <a class="desk-only" href="#/settings" data-route="settings"><span class="nav-ico"><svg class="ico" aria-hidden="true"><use href="#i-sliders"/></svg></span><span>Cài đặt</span></a>
     <a id="nav-admin" href="#/admin" data-route="admin" hidden><span class="nav-ico"><svg class="ico" aria-hidden="true"><use href="#i-shield"/></svg></span><span>Admin</span></a>
     <a id="nav-boss" href="#/boss" data-route="boss" hidden><span class="nav-ico"><svg class="ico" aria-hidden="true"><use href="#i-crown"/></svg></span><span>Boss</span></a>
   </nav>
+  <div class="top-actions">
+    <a href="#/ranking" data-route="ranking" aria-label="Xếp hạng"><svg class="ico" aria-hidden="true"><use href="#i-trophy"/></svg></a>
+    <a href="#/settings" data-route="settings" aria-label="Cài đặt"><svg class="ico" aria-hidden="true"><use href="#i-sliders"/></svg></a>
+  </div>
   <div class="nav-user"><span id="nav-user" class="chip"></span></div>
 </header>
 
@@ -402,9 +407,11 @@
           <small>Tên đăng nhập, không đổi được.</small></label>
         <label class="field"><span>Tên hiển thị</span>
           <input id="pf-display" type="text" maxlength="40" required></label>
-        <label class="field"><span>Ảnh đại diện (URL https)</span>
-          <input id="pf-avatar-url" type="url" maxlength="500" placeholder="https://…">
-          <small>Dán liên kết https tới ảnh của bạn.</small></label>
+        <div class="field"><span>Ảnh đại diện</span>
+          <input id="pf-avatar-file" type="file" accept="image/png,image/jpeg,image/webp,image/gif">
+          <input id="pf-avatar-url" type="hidden">
+          <small>Chọn ảnh từ thiết bị. Ảnh được thu nhỏ và lưu thẳng vào hệ thống (không cần link).</small>
+          <button id="pf-avatar-clear" type="button" class="btn btn-ghost btn-sm">Xóa ảnh</button></div>
         <label class="field"><span>Giới thiệu</span>
           <textarea id="pf-bio" rows="3" maxlength="280"></textarea></label>
         <p id="pf-error" class="form-error" role="alert" hidden></p>
@@ -412,6 +419,37 @@
       </form>
     </div>
     <div class="panel panel-wide"><h2>Thống kê &amp; lịch sử</h2><div id="pf-stats"></div></div>
+  </section>
+
+
+  <!-- GUIDE -->
+  <section id="screen-guide" class="screen" hidden>
+    <div class="page-head"><p class="eyebrow">Hướng dẫn</p><h1>Học Crownfall</h1></div>
+    <div class="panel"><h2>Chọn một quân</h2><div id="gd-pieces" class="gd-pieces"></div></div>
+    <div class="play-layout">
+      <div class="board-wrap"><div id="gd-board" class="board show-co" role="grid" aria-label="Bàn cờ minh họa"></div></div>
+      <aside class="side" aria-label="Điều khiển minh họa">
+        <div class="panel">
+          <h2 id="gd-title">Chọn một quân để xem</h2>
+          <ul id="gd-rules" class="gd-rules"></ul>
+          <div class="gd-bar" aria-hidden="true"><i id="gd-bar-fill"></i></div>
+          <p id="gd-cap" class="gd-cap" role="status"></p>
+          <p id="gd-pos" class="muted small"></p>
+          <div class="row">
+            <button id="gd-prev" class="btn btn-ghost btn-sm" type="button">Trước</button>
+            <button id="gd-play" class="btn btn-gold btn-sm" type="button">Tạm dừng</button>
+            <button id="gd-restart" class="btn btn-ghost btn-sm" type="button">Chạy lại</button>
+            <button id="gd-next" class="btn btn-ghost btn-sm" type="button">Tiếp</button>
+          </div>
+        </div>
+      </aside>
+    </div>
+    <div class="panel"><h2>Cơ chế đặc biệt</h2><div id="gd-lessons" class="gd-chips"></div></div>
+    <div class="panel"><h2>Hướng dẫn chơi</h2>
+      <p id="gd-step-title"><strong></strong></p><p id="gd-step-text"></p>
+      <div class="row"><button id="gd-gprev" class="btn btn-ghost btn-sm" type="button">Bước trước</button><span id="gd-gpos" class="muted small"></span><button id="gd-gnext" class="btn btn-gold btn-sm" type="button">Bước sau</button></div>
+    </div>
+    <div class="panel"><h2>Mẹo chiến thuật</h2><ul id="gd-tips" class="gd-rules"></ul><p class="muted small">Đây chỉ là gợi ý phối hợp quân, không phải luật bắt buộc.</p></div>
   </section>
 
   <!-- SETTINGS -->
