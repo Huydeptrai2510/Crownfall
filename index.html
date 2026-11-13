@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#04070a">
+<meta name="color-scheme" content="dark">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="description" content="Crownfall — game cờ chiến thuật fantasy dành cho hai người.">
+<title>Crownfall</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body data-motion="full">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
+<symbol id="i-crown" viewBox="0 0 24 24"><path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5z"/></symbol>
+<symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></symbol>
+<symbol id="i-swords" viewBox="0 0 24 24"><path d="M14.5 6.5L19 4l-1.5 4.5L8.5 18 6 18.5l.5-2.5zM9.5 6.5L5 4l1.5 4.5L15.5 18l2.5.5-.5-2.5zM4 20l3-3M20 20l-3-3"/></symbol>
+<symbol id="i-trophy" viewBox="0 0 24 24"><path d="M8 4h8v5a4 4 0 0 1-8 0zM8 6H4v2a4 4 0 0 0 4 4M16 6h4v2a4 4 0 0 1-4 4M12 13v4M8 21h8M10 17h4"/></symbol>
+<symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20v-1a5 5 0 0 1 5-5h3a5 5 0 0 1 5 5v1M16 4.6a3.5 3.5 0 0 1 0 6.8M21.5 20v-1a5 5 0 0 0-3.5-4.7"/></symbol>
+<symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/></symbol>
+<symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 6h8M18 6h2M4 12h2M12 12h8M4 18h10M20 18h0"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/></symbol>
+<symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/></symbol>
+<symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></symbol>
+<symbol id="i-key" viewBox="0 0 24 24"><circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M17 6l3 3M14 9l2 2"/></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+<symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+<symbol id="i-pawn" viewBox="0 0 24 24"><circle cx="12" cy="7" r="3.2"/><path d="M10 11.5h4l1 5.5H9zM7 21h10M8.5 17h7"/></symbol>
+<symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 14L4 9l5-5M4 9h10a6 6 0 0 1 0 12h-3"/></symbol>
+<symbol id="i-flag" viewBox="0 0 24 24"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></symbol>
+<symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 11a8 8 0 0 0-14-4L4 9M4 4v5h5M4 13a8 8 0 0 0 14 4l2-2M20 20v-5h-5"/></symbol>
+<symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a1 1 0 0 1 1-1h10"/></symbol>
+<symbol id="i-out" viewBox="0 0 24 24"><path d="M9 21H5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h4M16 17l5-5-5-5M21 12H9"/></symbol>
+<symbol id="i-equal" viewBox="0 0 24 24"><path d="M5 9h14M5 15h14"/></symbol>
+<symbol id="i-phone" viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2.5"/><path d="M11 18h2"/></symbol>
+<symbol id="i-in" viewBox="0 0 24 24"><path d="M15 3h4a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1h-4M10 17l5-5-5-5M15 12H3"/></symbol>
+<symbol id="i-userplus" viewBox="0 0 24 24"><circle cx="10" cy="8" r="4"/><path d="M3 21v-1a6 6 0 0 1 6-6h2M18 8v6M15 11h6"/></symbol>
+<symbol id="i-save" viewBox="0 0 24 24"><path d="M5 3h11l4 4v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zM8 3v5h7V3M8 21v-7h8v7"/></symbol>
+<symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></symbol>
+<symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></symbol>
+<symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4l13 8-13 8z"/></symbol>
+<symbol id="i-pause" viewBox="0 0 24 24"><path d="M8 4v16M16 4v16"/></symbol>
+<symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12M7 11l5 5 5-5M4 21h16"/></symbol>
+<symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></symbol>
+<symbol id="i-unlock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 7.5-2"/></symbol>
+<symbol id="i-send" viewBox="0 0 24 24"><path d="M21 3L3 10l7 3 3 7zM10 13l11-10"/></symbol>
+<symbol id="i-back" viewBox="0 0 24 24"><path d="M10 5l-7 7 7 7M3 12h18"/></symbol>
+<symbol id="i-next" viewBox="0 0 24 24"><path d="M14 5l7 7-7 7M21 12H3"/></symbol>
+</defs></svg>
+<div id="rotate-guard" class="rotate-guard" role="alert"><svg class="ico big spin-slow" aria-hidden="true"><use href="#i-phone"/></svg><strong>Hãy xoay dọc màn hình</strong></div>
+
+<div id="offline-banner" class="offline" role="status" hidden>Mất kết nối mạng. Một số thao tác tạm thời không khả dụng.</div>
+
+<div id="reconnect-banner" class="offline reconnect" role="status" hidden>Đang kết nối lại với máy chủ… Đồng hồ trận vẫn chạy theo máy chủ.</div>
+
+<header id="topbar" class="topbar" hidden>
+  <a class="brand" href="#/home" aria-label="Crownfall — Trang chủ">
+    <svg class="ico brand-mark" aria-hidden="true"><use href="#i-crown"/></svg>
+    <span id="brand-logo" class="brand-logo" data-slot="logo"></span>
+    <span class="brand-name">Crownfall</span>
+  </a>
+  <nav id="nav" class="nav" aria-label="Điều hướng chính">
+    <a href="#/home" data-route="home"><span class="nav-ico"><svg class="ico" aria-hidden="true"><use href="#i-home"/></svg></span><span>Sảnh</span></a>
+    <a href="#/modes" data-route="modes"><span class="nav-ico"><svg class="ico" aria-hidden="true"><use href="#i-swords"/></svg></span><span>Chơi</span></a>
+    <a href="#/ranking" data-route="ranking"><span class="nav-ico"><svg class="ico" aria-hidden="true"><use href="#i-trophy"/></svg></span><span>Xếp hạng</span></a>
+    <a href="#/friends" data-route="friends"><span class="nav-ico"><svg class="ico" aria-hidden="true"><use href="#i-users"/></svg></span><span>Bạn bè</span><span id="nav-friends-badge" class="badge" hidden></span></a>
+    <a href="#/profile" data-route="profile"><span class="nav-ico"><svg class="ico" aria-hidden="true"><use href="#i-user"/></svg></span><span>Hồ sơ</span></a>
+    <a href="#/settings" data-route="settings"><span class="nav-ico"><svg class="ico" aria-hidden="true"><use href="#i-sliders"/></svg></span><span>Cài đặt</span></a>
+    <a id="nav-admin" href="#/admin" data-route="admin" hidden><span class="nav-ico"><svg class="ico" aria-hidden="true"><use href="#i-shield"/></svg></span><span>Admin</span></a>
+    <a id="nav-boss" href="#/boss" data-route="boss" hidden><span class="nav-ico"><svg class="ico" aria-hidden="true"><use href="#i-crown"/></svg></span><span>Boss</span></a>
+  </nav>
+  <div class="nav-user"><span id="nav-user" class="chip"></span></div>
+</header>
+
+<main id="main" class="main" tabindex="-1">
+
+  <!-- LOADING -->
+  <section id="screen-loading" class="screen center" aria-live="polite">
+    <div class="loader" role="progressbar" aria-label="Đang tải"></div>
+    <p class="muted" id="loading-text">Đang triệu tập quân đoàn…</p>
+  </section>
+
+  <!-- ERROR -->
+  <section id="screen-error" class="screen center" hidden>
+    <div class="panel panel-narrow state-box">
+      <h1 id="error-title">Có lỗi xảy ra</h1>
+      <p id="error-msg" class="muted"></p>
+      <pre id="error-detail" class="detail" hidden></pre>
+      <div class="row">
+        <button id="error-retry" class="btn btn-gold" type="button">Thử lại</button>
+        <button id="error-login" class="btn btn-ghost" type="button" hidden>Về đăng nhập</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- LOGIN -->
+  <section id="screen-login" class="screen auth" hidden>
+    <div class="panel panel-narrow">
+      <p class="eyebrow">Hai thế lực — một ngai vàng</p>
+      <h1>Đăng nhập</h1>
+      <form id="form-login" novalidate>
+        <label class="field"><span>Tên người dùng</span>
+          <input id="login-username" type="text" autocomplete="username" required minlength="3" maxlength="20" autocapitalize="none" spellcheck="false"></label>
+        <label class="field"><span>Mật khẩu</span>
+          <input id="login-password" type="password" autocomplete="current-password" required maxlength="128"></label>
+        <p id="login-error" class="form-error" role="alert" hidden></p>
+        <button class="btn btn-gold btn-block" type="submit">Vào chiến trường</button>
+      </form>
+      <p class="switch">Chưa có tài khoản? <a href="#/register">Đăng ký</a></p>
+    </div>
+  </section>
+
+  <!-- REGISTER -->
+  <section id="screen-register" class="screen auth" hidden>
+    <div class="panel panel-narrow">
+      <p class="eyebrow">Gia nhập Crownfall</p>
+      <h1>Đăng ký</h1>
+      <form id="form-register" novalidate>
+        <label class="field"><span>Tên người dùng</span>
+          <input id="reg-username" type="text" autocomplete="username" required minlength="3" maxlength="20" autocapitalize="none" spellcheck="false">
+          <small>3–20 ký tự: chữ thường a–z, số, dấu gạch dưới.</small></label>
+        <label class="field"><span>Tên hiển thị <em>(tuỳ chọn)</em></span>
+          <input id="reg-display" type="text" autocomplete="nickname" maxlength="40"></label>
+        <label class="field"><span>Mật khẩu</span>
+          <input id="reg-password" type="password" autocomplete="new-password" required minlength="8" maxlength="128">
+          <small>Tối thiểu 8 ký tự. Không có khôi phục mật khẩu nên hãy ghi nhớ cẩn thận.</small></label>
+        <label class="field"><span>Nhập lại mật khẩu</span>
+          <input id="reg-password2" type="password" autocomplete="new-password" required maxlength="128"></label>
+        <p id="reg-error" class="form-error" role="alert" hidden></p>
+        <p id="reg-info" class="form-info" role="status" hidden></p>
+        <button class="btn btn-gold btn-block" type="submit">Tạo tài khoản</button>
+      </form>
+      <p class="switch">Đã có tài khoản? <a href="#/login">Đăng nhập</a></p>
+    </div>
+  </section>
+
+  <!-- HOME -->
+  <section id="screen-home" class="screen" hidden>
+    <div class="page-head">
+      <p class="eyebrow">Sảnh chỉ huy</p>
+      <h1 id="home-greeting">Xin chào</h1>
+    </div>
+
+    <div class="grid stats">
+      <div class="panel stat"><span class="stat-label">Điểm xếp hạng</span><strong id="home-rating">—</strong><span id="home-tier" class="muted small"></span></div>
+      <div class="panel stat"><span class="stat-label">Số trận</span><strong id="home-games">—</strong></div>
+      <div class="panel stat"><span class="stat-label">Bạn bè</span><strong id="home-friends">—</strong></div>
+    </div>
+
+    <div class="grid two">
+      <div class="panel">
+        <h2>Chiến trường</h2>
+        <p class="muted">Ghép trận xếp hạng với người lạ, mở phòng riêng hoặc chơi cùng bạn bè. Muốn chơi chung một máy? Có chế độ riêng.</p>
+        <div class="row">
+          <button id="btn-modes" class="btn btn-gold" type="button"><svg class="ico" aria-hidden="true"><use href="#i-swords"/></svg>Chơi trực tuyến</button>
+          <button id="btn-play" class="btn btn-ghost" type="button"><svg class="ico" aria-hidden="true"><use href="#i-pawn"/></svg>Chơi 1 máy</button>
+        </div>
+      </div>
+      <div class="panel">
+        <h2>Bạn bè</h2>
+        <ul id="friends-list" class="list" hidden></ul>
+        <div id="friends-empty" class="empty" hidden>
+          <p><strong>Chưa có đồng minh nào</strong></p>
+          <p class="muted">Danh sách bạn bè trống. Hãy kết bạn bằng tên người dùng.</p>
+        </div>
+        <div class="row"><button id="btn-friends-link" class="btn btn-ghost" type="button"><svg class="ico" aria-hidden="true"><use href="#i-users"/></svg>Quản lý bạn bè</button></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Binh đoàn</h2>
+      <div id="roster" class="roster"></div>
+    </div>
+  </section>
+
+  <!-- PLAY -->
+  <section id="screen-play" class="screen" hidden>
+    <div class="page-head"><p class="eyebrow">Bàn cờ</p><h1 id="play-title">Chơi 1 máy</h1></div>
+    <div class="play-layout">
+      <div class="board-wrap">
+        <div id="board" class="board" role="grid" aria-label="Bàn cờ 9 nhân 9"></div>
+        <div id="board-banner" class="banner" role="status" hidden></div>
+      </div>
+      <aside class="side" aria-label="Thông tin ván đấu">
+        <div class="panel">
+          <div id="turn-label" class="turn"></div>
+          <p id="check-label" class="check-label muted"></p>
+          <div id="local-actions" class="row">
+            <button id="btn-undo" class="btn btn-ghost" type="button"><svg class="ico" aria-hidden="true"><use href="#i-undo"/></svg>Hoàn tác</button>
+            <button id="btn-newgame" class="btn btn-gold" type="button"><svg class="ico" aria-hidden="true"><use href="#i-refresh"/></svg>Ván mới</button>
+          </div>
+        </div>
+        <div id="online-panel" class="panel" hidden>
+          <p id="op-badge" class="eyebrow"></p>
+          <div id="op-players" class="op-players"></div>
+          <p id="op-status" class="muted small" role="status" aria-live="polite"></p>
+          <div id="op-draw" class="draw-box" hidden></div>
+          <div id="op-actions" class="row" hidden>
+            <button id="btn-draw" class="btn btn-ghost btn-sm" type="button"><svg class="ico" aria-hidden="true"><use href="#i-equal"/></svg>Xin hòa</button>
+            <button id="btn-resign" class="btn btn-red btn-sm" type="button"><svg class="ico" aria-hidden="true"><use href="#i-flag"/></svg>Đầu hàng</button>
+          </div>
+          <div id="op-result" class="result-box" hidden>
+            <strong id="op-result-title"></strong>
+            <p id="op-result-sub" class="muted small"></p>
+            <p id="op-rating" class="small rating-line" role="status" hidden></p>
+            <p id="op-rematch-status" class="small" role="status"></p>
+            <div id="op-replay-actions" class="row" hidden>
+              <button id="btn-replay" class="btn btn-ghost btn-sm" type="button">Xem replay</button>
+              <button id="btn-save-replay" class="btn btn-ghost btn-sm" type="button">Lưu replay</button>
+            </div>
+            <div class="row">
+              <button id="btn-rematch" class="btn btn-gold btn-sm" type="button">Tái đấu</button>
+              <button id="btn-rematch-no" class="btn btn-ghost btn-sm" type="button">Từ chối</button>
+              <button id="btn-leave-match" class="btn btn-ghost btn-sm" type="button">Rời phòng</button>
+            </div>
+          </div>
+        </div>
+        <div class="panel"><h2>Quân đã chọn</h2><div id="piece-info"></div></div>
+        <div class="panel"><h2>Lịch sử nước đi</h2><ol id="history" class="history"></ol></div>
+        <p class="legend small muted">Chấm xanh: ô đi · viền đỏ: bắt được · vàng: đổi Vua–Thuật · sọc: Đường Cấm · quầng vàng: được Thuật hỗ trợ.</p>
+      </aside>
+    </div>
+  </section>
+
+  <!-- MODES -->
+  <section id="screen-modes" class="screen" hidden>
+    <div class="page-head"><p class="eyebrow">Chiến trường</p><h1>Chọn chế độ chơi</h1></div>
+    <div id="m-resume" class="panel resume" hidden>
+      <p id="m-resume-text"></p>
+      <button id="m-resume-go" class="btn btn-gold btn-sm" type="button">Quay lại</button>
+    </div>
+    <h2 class="group"><svg class="ico" aria-hidden="true"><use href="#i-bolt"/></svg>Trực tuyến</h2>
+    <div class="grid two">
+      <div class="panel mode"><h2>Xếp hạng</h2>
+        <p class="muted">Ghép với người lạ có điểm gần bạn. Tính điểm xếp hạng, 60 giây mỗi lượt. Có thể hủy bất cứ lúc nào.</p>
+        <button id="m-quick" class="btn btn-gold" type="button"><svg class="ico" aria-hidden="true"><use href="#i-bolt"/></svg>Tìm trận</button></div>
+      <div class="panel mode"><h2>Phòng riêng</h2>
+        <p class="muted">Tạo phòng rồi gửi mã mời, hoặc nhập mã để vào. Không tính điểm.</p>
+        <div class="row"><button id="m-create" class="btn btn-red" type="button"><svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg>Tạo phòng</button>
+          <button id="m-join" class="btn btn-blue" type="button"><svg class="ico" aria-hidden="true"><use href="#i-key"/></svg>Vào bằng mã</button></div></div>
+      <div class="panel mode"><h2>Đấu với bạn bè</h2>
+        <p class="muted">Gửi và nhận lời mời vào trận từ danh sách bạn bè.</p>
+        <button id="m-friends" class="btn btn-ghost" type="button"><svg class="ico" aria-hidden="true"><use href="#i-users"/></svg>Bạn bè &amp; lời mời</button></div>
+      <div class="panel mode"><h2>Xem trận</h2>
+        <p class="muted">Nhập mã phòng để xem trận đang diễn ra (nếu chủ phòng cho phép).</p>
+        <button id="m-spectate" class="btn btn-ghost" type="button"><svg class="ico" aria-hidden="true"><use href="#i-eye"/></svg>Xem bằng mã</button></div>
+    </div>
+    <h2 class="group"><svg class="ico" aria-hidden="true"><use href="#i-pawn"/></svg>Chơi 1 máy</h2>
+    <div class="panel mode"><p class="muted">Hai người luân phiên đi trên cùng một thiết bị. Không lưu ván, không tính điểm.</p>
+      <button id="m-local" class="btn btn-ghost" type="button"><svg class="ico" aria-hidden="true"><use href="#i-pawn"/></svg>Bắt đầu</button></div>
+  </section>
+
+  <!-- LOBBY -->
+  <section id="screen-lobby" class="screen" hidden>
+    <div class="page-head"><p class="eyebrow" id="lb-mode">Phòng chờ</p><h1>Phòng chờ</h1></div>
+    <div class="panel panel-medium">
+      <p class="muted small">Mã phòng</p>
+      <div class="code-row"><strong id="lb-code" class="code">…</strong><button id="lb-copy" class="btn btn-ghost btn-sm" type="button"><svg class="ico" aria-hidden="true"><use href="#i-copy"/></svg>Sao chép</button></div>
+      <div id="lb-players" class="lb-players"></div>
+      <p id="lb-info" class="muted" role="status" aria-live="polite"></p>
+      <p id="lb-spectators" class="muted small"></p>
+      <div id="lb-host" hidden>
+        <hr class="rule">
+        <label class="field"><span>Thời gian mỗi lượt</span>
+          <select id="lb-turn"><option value="30">30 giây</option><option value="60">60 giây</option><option value="90">90 giây</option><option value="120">120 giây</option></select></label>
+        <label class="toggle"><input id="lb-spec" type="checkbox"><span>Cho phép người xem</span></label>
+        <label class="field"><span>Bạn chơi phe</span>
+          <select id="lb-side"><option value="random">Ngẫu nhiên</option><option value="red">Đỏ</option><option value="blue">Xanh</option></select></label>
+      </div>
+      <div class="row">
+        <button id="lb-start" class="btn btn-gold" type="button" disabled>Bắt đầu trận</button>
+        <button id="lb-leave" class="btn btn-ghost" type="button">Rời phòng</button>
+      </div>
+    </div>
+    <div id="lb-invite-box" class="panel panel-medium" hidden>
+      <h2>Mời bạn bè</h2>
+      <ul id="lb-friends" class="list"></ul>
+      <p id="lb-friends-empty" class="muted small">Chưa có bạn bè để mời. Bạn có thể gửi mã phòng trực tiếp.</p>
+    </div>
+  </section>
+
+  <!-- QUEUE -->
+  <section id="screen-queue" class="screen center" hidden>
+    <div id="q-search" class="panel panel-narrow state-box">
+      <div class="loader" role="progressbar" aria-label="Đang tìm đối thủ"></div>
+      <h1>Đang tìm đối thủ…</h1>
+      <p class="muted">Đã chờ <span id="q-time">0 giây</span> · điểm của bạn <span id="q-rating">—</span></p>
+      <p class="muted small">Tối đa 2 phút.</p>
+      <button id="q-cancel" class="btn btn-ghost" type="button">Hủy tìm trận</button>
+    </div>
+    <div id="q-fail" class="panel panel-narrow state-box" hidden>
+      <h1>Chưa có trận</h1>
+      <p id="q-fail-msg" class="muted"></p>
+      <div class="row"><button id="q-retry" class="btn btn-gold" type="button">Tìm lại</button><button id="q-back" class="btn btn-ghost" type="button">Về chọn chế độ</button></div>
+    </div>
+  </section>
+
+  <!-- FRIENDS -->
+  <section id="screen-friends" class="screen" hidden>
+    <div class="page-head"><p class="eyebrow">Đồng minh</p><h1>Bạn bè &amp; lời mời</h1></div>
+    <div class="panel panel-medium">
+      <form id="form-friend-add" novalidate>
+        <label class="field"><span>Kết bạn bằng tên người dùng</span>
+          <input id="fr-username" type="text" maxlength="20" autocapitalize="none" spellcheck="false" autocomplete="off" placeholder="vd: hero_abc123"></label>
+        <p id="fr-error" class="form-error" role="alert" hidden></p>
+        <button class="btn btn-gold" type="submit">Gửi lời mời kết bạn</button>
+      </form>
+    </div>
+    <div id="fr-invites-box" class="panel panel-medium" hidden><h2>Lời mời vào trận</h2><ul id="fr-invites" class="list"></ul></div>
+    <div id="fr-requests-box" class="panel panel-medium" hidden><h2>Lời mời kết bạn</h2><ul id="fr-requests" class="list"></ul></div>
+    <div class="panel panel-medium"><h2>Bạn bè</h2>
+      <ul id="fr-list" class="list"></ul>
+      <div id="fr-empty" class="empty"><p><strong>Chưa có bạn bè</strong></p><p class="muted">Chấm xanh: đang hoạt động.</p></div>
+    </div>
+  </section>
+
+  <!-- RANKING -->
+  <section id="screen-ranking" class="screen" hidden>
+    <div class="page-head"><p class="eyebrow">Đấu trường</p><h1>Bảng xếp hạng</h1></div>
+    <div class="tabs" role="tablist" aria-label="Loại bảng xếp hạng">
+      <button id="rk-tab-global" class="tab" type="button" role="tab" aria-selected="true">Toàn cầu</button>
+      <button id="rk-tab-weekly" class="tab" type="button" role="tab" aria-selected="false">Theo tuần</button>
+    </div>
+    <div id="rk-week-row" class="panel panel-medium" hidden>
+      <label class="field"><span>Tuần</span><select id="rk-week"><option value="0">Tuần này</option><option value="-1">Tuần trước</option><option value="-2">2 tuần trước</option><option value="-3">3 tuần trước</option></select></label>
+      <p id="rk-week-range" class="muted small"></p>
+    </div>
+    <div id="rk-my" class="panel" hidden></div>
+    <div class="panel">
+      <div class="tbl-wrap"><table class="tbl" id="rk-table"><thead id="rk-head"></thead><tbody id="rk-body"></tbody></table></div>
+      <div id="rk-empty" class="empty" hidden><p><strong>Chưa có dữ liệu</strong></p><p class="muted">Bảng sẽ có người chơi sau khi có trận Ranked kết thúc.</p></div>
+      <p id="rk-status" class="muted small" role="status"></p>
+      <div class="row"><button id="rk-more" class="btn btn-ghost btn-sm" type="button" hidden>Xem thêm</button><button id="rk-refresh" class="btn btn-ghost btn-sm" type="button"><svg class="ico" aria-hidden="true"><use href="#i-refresh"/></svg>Làm mới</button></div>
+      <p id="rk-note" class="muted small"></p>
+    </div>
+  </section>
+
+  <!-- PLAYER (hồ sơ công khai) -->
+  <section id="screen-player" class="screen" hidden>
+    <div class="page-head"><p class="eyebrow">Chiến binh</p><h1>Hồ sơ người chơi</h1></div>
+    <div class="panel panel-wide"><div id="pl-body"></div></div>
+  </section>
+
+  <!-- REPLAY -->
+  <section id="screen-replay" class="screen" hidden>
+    <div class="page-head"><p class="eyebrow">Replay</p><h1 id="rp-title">Replay</h1></div>
+    <p id="rp-status" class="muted" role="status">Đang tải replay…</p>
+    <div id="rp-main" hidden>
+      <div id="rp-warn" class="warn-box" role="alert" hidden></div>
+      <div class="play-layout">
+        <div class="board-wrap"><div id="rp-board" class="board show-co" role="grid" aria-label="Bàn cờ replay"></div></div>
+        <aside class="side" aria-label="Điều khiển replay">
+          <div class="panel">
+            <div id="rp-players" class="op-players"></div>
+            <p id="rp-result" class="small"></p>
+            <p id="rp-pos" class="eyebrow"></p>
+            <input id="rp-range" class="range" type="range" min="0" max="0" value="0" step="1" aria-label="Chọn nước đi">
+            <div class="row tight">
+              <button id="rp-first" class="btn btn-ghost btn-sm" type="button" aria-label="Về đầu">⏮</button>
+              <button id="rp-prev" class="btn btn-ghost btn-sm" type="button">Lùi</button>
+              <button id="rp-play" class="btn btn-gold btn-sm" type="button">Phát</button>
+              <button id="rp-next" class="btn btn-ghost btn-sm" type="button">Tiến</button>
+              <button id="rp-last" class="btn btn-ghost btn-sm" type="button" aria-label="Về cuối">⏭</button>
+            </div>
+            <label class="field"><span>Tốc độ</span><select id="rp-speed"><option value="0.5">0,5×</option><option value="1" selected>1×</option><option value="2">2×</option><option value="4">4×</option></select></label>
+            <div class="row tight">
+              <button id="rp-txt" class="btn btn-ghost btn-sm" type="button">Xuất TXT</button>
+              <button id="rp-save" class="btn btn-ghost btn-sm" type="button" hidden>Lưu replay</button>
+              <button id="rp-remove" class="btn btn-red btn-sm" type="button" hidden>Bỏ replay của tôi</button>
+              <button id="rp-back" class="btn btn-ghost btn-sm" type="button">Quay lại</button>
+            </div>
+          </div>
+          <div class="panel"><h2>Nước đi</h2><div id="rp-info"></div></div>
+          <div class="panel"><h2>Danh sách nước</h2><ol id="rp-moves" class="history mv-list"></ol></div>
+          <p class="legend small muted">Phím ←/→ để lùi/tiến, Space để phát/dừng. Viền đỏ: ô bắt quân · vàng: đổi Vua–Thuật.</p>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <!-- ADMIN / BOSS -->
+  <section id="screen-admin" class="screen" hidden>
+    <div class="page-head"><p id="ad-eyebrow" class="eyebrow">Quản trị</p><h1 id="ad-title">Bảng điều khiển</h1></div>
+    <div id="ad-body"></div>
+  </section>
+
+  <!-- PROFILE -->
+  <section id="screen-profile" class="screen" hidden>
+    <div class="page-head">
+      <p class="eyebrow">Hồ sơ</p>
+      <h1>Hồ sơ chiến binh</h1>
+    </div>
+    <div class="panel panel-medium">
+      <div class="profile-top">
+        <div id="pf-avatar" class="avatar" aria-hidden="true"></div>
+        <div><strong id="pf-title"></strong><p id="pf-meta" class="muted small"></p></div>
+      </div>
+      <form id="form-profile" novalidate>
+        <label class="field"><span>Tên người dùng</span>
+          <input id="pf-username" type="text" minlength="3" maxlength="20" autocapitalize="none" spellcheck="false" autocomplete="off" disabled>
+          <small>Tên đăng nhập, không đổi được.</small></label>
+        <label class="field"><span>Tên hiển thị</span>
+          <input id="pf-display" type="text" maxlength="40" required></label>
+        <label class="field"><span>Ảnh đại diện (URL https)</span>
+          <input id="pf-avatar-url" type="url" maxlength="500" placeholder="https://…">
+          <small>Dán liên kết https tới ảnh của bạn.</small></label>
+        <label class="field"><span>Giới thiệu</span>
+          <textarea id="pf-bio" rows="3" maxlength="280"></textarea></label>
+        <p id="pf-error" class="form-error" role="alert" hidden></p>
+        <button class="btn btn-gold" type="submit">Lưu hồ sơ</button>
+      </form>
+    </div>
+    <div class="panel panel-wide"><h2>Thống kê &amp; lịch sử</h2><div id="pf-stats"></div></div>
+  </section>
+
+  <!-- SETTINGS -->
+  <section id="screen-settings" class="screen" hidden>
+    <div class="page-head">
+      <p class="eyebrow">Cài đặt</p>
+      <h1>Tuỳ chỉnh</h1>
+    </div>
+    <div class="panel panel-medium">
+      <form id="form-settings" novalidate>
+        <label class="toggle"><input id="st-sound" type="checkbox"><span>Âm thanh</span></label>
+        <label class="toggle"><input id="st-motion" type="checkbox"><span>Giảm hiệu ứng chuyển động</span></label>
+        <label class="toggle"><input id="st-online" type="checkbox"><span>Hiển thị trạng thái hoạt động</span></label>
+        <p id="st-error" class="form-error" role="alert" hidden></p>
+        <button class="btn btn-gold" type="submit">Lưu cài đặt</button>
+      </form>
+      <hr class="rule">
+      <form id="form-replay-prefs" novalidate>
+        <h2>Tùy chọn xem replay</h2>
+        <label class="toggle"><input id="rpp-autoplay" type="checkbox"><span>Tự động phát khi mở replay</span></label>
+        <label class="toggle"><input id="rpp-coords" type="checkbox"><span>Hiện tọa độ trên ô cờ (hàng.cột)</span></label>
+        <label class="field"><span>Tốc độ phát</span><select id="rpp-speed"><option value="0.5">0,5×</option><option value="1">1×</option><option value="2">2×</option><option value="4">4×</option></select></label>
+        <p id="rpp-error" class="form-error" role="alert" hidden></p>
+        <button class="btn btn-gold" type="submit">Lưu tùy chọn replay</button>
+      </form>
+      <hr class="rule">
+      <button id="btn-logout" class="btn btn-ghost" type="button"><svg class="ico" aria-hidden="true"><use href="#i-out"/></svg>Đăng xuất</button>
+    </div>
+  </section>
+
+</main>
+
+<div id="modal" class="modal" hidden>
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-title" tabindex="-1">
+    <h2 id="modal-title"></h2>
+    <div id="modal-body"></div>
+    <p id="modal-error" class="form-error" role="alert" hidden></p>
+    <div id="modal-actions" class="row"></div>
+  </div>
+</div>
+
+<div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+<script src="script.js" defer></script>
+</body>
+</html>
