@@ -29,7 +29,7 @@
    * Khi enabled = false, ảnh thiếu hoặc lỗi tải: hiện khung giữ chỗ có chữ.
    * =================================================================== */
   const ASSET_CONFIG = {
-    enabled: false,
+    enabled: true,
     basePath: '',                        // ảnh nằm CHUNG thư mục với index.html (để rỗng); muốn thư mục con thì ghi vd 'assets/'
     logo: 'logo.png',                    // TÊN MẪU
     defaultAvatar: 'avatar-default.png', // TÊN MẪU
