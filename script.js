@@ -67,7 +67,7 @@
    *     (RULES_OPTIONS.SOLDIER_COUNTS_CAPTURER).
    *  A3 Sói: "vùng 5×5" = ô cách Sói tối đa 2 theo Chebyshev, cắt theo mép bàn (WolfRules.zone); nhảy qua quân;
    *     bắt thường = đúng cách 2 ô Chebyshev; có Thuật hỗ trợ = mọi quân địch trong vùng. Đường Cấm chỉ chặn ô đến.
-   *  A4 Gấu chỉ bắt được khi đang đứng ở row 4 trước khi đi.
+   *  A4 [FIX-GAU-2026-11-14] Gấu đi 1 ô 8 hướng; chỉ bắt khi đang ở row 4 HOẶC được Thuật hỗ trợ (cùng hàng/cột). Gấu ngoài row 4 luôn bất tử (Thuật không gỡ).
    *  A5 Vua–Thuật đổi chỗ không giới hạn khoảng cách; chỉ kiểm tra đúng các điều kiện tài liệu nêu.
    *  A6 Quân địch đã đứng sẵn trong Đường Cấm khi vùng hình thành vẫn được rời đi / bị bắt.
    *  A7 P1 = phe Xanh, P2 = phe Đỏ (FACTION).
@@ -85,7 +85,7 @@
   const DIRS_ALL = DIRS_ORTH.concat([[-1, -1], [-1, 1], [1, -1], [1, 1]]);
   const GEOMETRY = {
     L: { dirs: DIRS_ALL, max: 2 }, V: { dirs: DIRS_ALL, max: 1 }, M: { dirs: DIRS_ALL, max: 8 }, C: { dirs: DIRS_ALL, max: 8 },
-    G: { dirs: DIRS_ORTH, max: 1 }, N: { dirs: DIRS_ORTH, max: 2 }, T: { dirs: DIRS_ORTH, max: 1 }
+    G: { dirs: DIRS_ALL, max: 1 }, N: { dirs: DIRS_ORTH, max: 2 }, T: { dirs: DIRS_ORTH, max: 1 }
   };
   const other = (o) => (o === 'P1' ? 'P2' : 'P1');
   const ckey = (r, c) => r * SIZE + c;
@@ -168,7 +168,7 @@
         case 'V': return sup;
         case 'M': case 'C': case 'N': return true;
         case 'S': return sup || Math.max(Math.abs(target.row - p.row), Math.abs(target.col - p.col)) === WolfRules.CAPTURE_DISTANCE;
-        case 'G': return p.row === BORDER_ROW;
+        case 'G': return sup || p.row === BORDER_ROW;
         case 'T': return SpellPair.active(board, p.owner);
         default: return false;
       }
@@ -420,8 +420,8 @@
         const a = mk([['P2', 'S', 4, 4]]), b = mk([['P2', 'S', 4, 4], ['P2', 'L', 4, 5]]);
         return mv(a, 'P2-S1').length === 24 && mv(b, 'P2-S1').length === 23 && has(mv(b, 'P2-S1'), 4, 6, 'move');
       });
-      t('Gấu: 4 hướng, 1 ô; Thuật: 4 hướng, 1 ô', () =>
-        mv(mk([['P2', 'G', 4, 4]]), 'P2-G1').length === 4 && mv(mk([['P2', 'T', 4, 4]]), 'P2-T1').length === 4);
+      t('Gấu: 8 hướng, 1 ô; Thuật: 4 hướng, 1 ô', () =>
+        mv(mk([['P2', 'G', 4, 4]]), 'P2-G1').length === 8 && mv(mk([['P2', 'T', 4, 4]]), 'P2-T1').length === 4);
       t('Ngưu: ngang/dọc tối đa 2 ô, không xuyên quân', () => {
         const a = mk([['P2', 'N', 4, 4]]), b = mk([['P2', 'N', 4, 4], ['P2', 'L', 3, 4]]);
         return mv(a, 'P2-N1').length === 8 && !has(mv(b, 'P2-N1'), 3, 4) && !has(mv(b, 'P2-N1'), 2, 4);
@@ -466,6 +466,23 @@
       t('Gấu trên biên giới có thể bị bắt (cả Gấu phe nào)', () => {
         const a = mk([['P2', 'M', 6, 4], ['P1', 'G', 4, 4]]), b = mk([['P1', 'M', 2, 4], ['P2', 'G', 4, 4]], 'P1');
         return has(mv(a, 'P2-M1'), 4, 4, 'capture') && has(mv(b, 'P1-M1'), 4, 4, 'capture');
+      });
+      t('Gấu đi 8 hướng (cả chéo), bị chặn bởi quân khác', () => {
+        const a = mk([['P2', 'G', 6, 4]]), b = mk([['P2', 'G', 6, 4], ['P2', 'L', 5, 5]]);
+        return mv(a, 'P2-G1').length === 8 && has(mv(a, 'P2-G1'), 5, 5, 'move') && mv(b, 'P2-G1').length === 7 && !has(mv(b, 'P2-G1'), 5, 5);
+      });
+      t('Gấu cùng hàng/cột với Thuật: được hỗ trợ, ăn được ngoài biên giới (cả chéo)', () => {
+        const a = mk([['P2', 'G', 6, 4], ['P1', 'L', 5, 5]]), b = mk([['P2', 'G', 6, 4], ['P1', 'L', 5, 5], ['P2', 'T', 6, 0]]);
+        return !has(mv(a, 'P2-G1'), 5, 5, 'capture') && has(mv(b, 'P2-G1'), 5, 5, 'capture');
+      });
+      t('Thuật không gỡ bất tử của Gấu địch ngoài biên; Gấu địch trên biên vẫn bị ăn', () => {
+        const a = mk([['P2', 'G', 6, 4], ['P2', 'T', 6, 0], ['P1', 'G', 5, 5]]);
+        const b = mk([['P2', 'G', 5, 4], ['P2', 'T', 5, 0], ['P1', 'G', 4, 5]]);
+        return !has(mv(a, 'P2-G1'), 5, 5, 'capture') && has(mv(b, 'P2-G1'), 4, 5, 'capture');
+      });
+      t('Gấu có Thuật hỗ trợ ở lãnh thổ địch: ăn được nhưng quân địch không ăn được Gấu', () => {
+        const s = mk([['P2', 'G', 2, 4], ['P2', 'T', 7, 4], ['P1', 'L', 1, 3]]);
+        return has(mv(s, 'P2-G1'), 1, 3, 'capture') && !has(mv(s, 'P1-L1'), 2, 4);
       });
       t('Cặp Thuật: chỉ bắt khi 2 Thuật cùng hàng/cột', () => {
         const a = mk([['P2', 'T', 4, 4], ['P2', 'T', 4, 0], ['P1', 'L', 4, 5]]), b = mk([['P2', 'T', 4, 4], ['P2', 'T', 1, 1], ['P1', 'L', 4, 5]]);
@@ -1017,7 +1034,7 @@
     M: 'Trượt không giới hạn mọi hướng, bắt tự do. Cùng hàng/cột với Ngưu tạo Đường Cấm.',
     C: 'Trượt không giới hạn mọi hướng, bắt tự do.',
     S: 'Nhảy trong vùng 5×5. Bắt mục tiêu cách đúng 2 ô; có Thuật hỗ trợ thì bắt mọi mục tiêu trong vùng.',
-    G: 'Đi 1 ô ngang/dọc. Ngoài biên giới: bất tử. Trên biên giới (hàng 5): bắt được và bị bắt được.',
+    G: 'Đi 1 ô mọi hướng (ngang, dọc, chéo). Ngoài biên giới: bất tử. Trên biên giới (hàng 5): bắt được và bị bắt được. Cùng hàng/cột với Thuật: được hỗ trợ, ăn được ở mọi nơi (Thuật không gỡ bất tử của Gấu địch).',
     N: 'Đi tối đa 2 ô ngang/dọc, bắt tự do. Cùng hàng/cột với Mã tạo Đường Cấm.',
     T: 'Đi 1 ô ngang/dọc. Bắt khi Cặp Thuật hoạt động (2 Thuật cùng hàng/cột). Mất 1 Thuật thì mất cả hai.'
   };
@@ -2213,7 +2230,7 @@
     SC.M = slider('M', 'Mã ăn quân tại ô đến. Mã và Ngưu cùng hàng/cột tạo Đường Cấm (xem bài Đường Cấm).');
     SC.C = slider('C', 'Cận ăn quân tại ô đến hợp lệ.');
     { const L = P('L', 'R', 6, 4), blk = P('L', 'R', 5, 4), a1 = P('L', 'R', 5, 3), a2 = P('L', 'R', 5, 5), e = P('M', 'B', 4, 4);
-      SC.L = [{ p: [L], mv: ring(6, 4, 2), cap: 'Lính đi tối đa 2 ô theo ngang, dọc hoặc chéo.' },
+      SC.L = [{ p: [L], ...slide([L], L, D8, 2), cap: 'Lính đi tối đa 2 ô theo ngang, dọc hoặc chéo.' },
         { p: [L, blk], ...slide([L, blk], L, D8, 2), cap: 'Không được xuyên qua quân khác: phía trên bị chặn.' },
         { p: [L, a1, a2, e], sp: [[5, 3], [5, 5]], cp: [[4, 4]], cap: 'Mục tiêu có ít nhất 2 đồng minh xung quanh → Lính được ăn.' },
         { p: [P('L', 'R', 4, 4), a1, a2], f: [6, 4], a: [4, 4], x: [[4, 4]], cap: 'Lính ăn quân; quân bị bắt biến mất.' },
@@ -2227,11 +2244,17 @@
       SC.S = [{ p: [S], mv: ring(6, 4, 2), cap: 'Sói đi trong vùng 5×5 quanh nó và có thể nhảy qua quân khác.' },
         { p: [S, e1, e2], mv: not(ring(6, 4, 2), [5, 4], [4, 4]), cp: [[4, 4]], bad: [[5, 4]], cap: 'Bình thường Sói chỉ ăn quân cách đúng 2 ô; quân sát bên không ăn được.' },
         { p: [P('S', 'R', 4, 4), e1], f: [6, 4], a: [4, 4], x: [[4, 4]], cap: 'Sói nhảy qua quân chắn và ăn mục tiêu cách 2 ô.' }]; }
-    { const G = P('G', 'R', 4, 4), e = P('L', 'B', 4, 5);
-      SC.G = [{ p: [G], mv: [[3, 4], [5, 4], [4, 3], [4, 5]], cap: 'Gấu đi 1 ô ngang hoặc dọc.' },
-        { p: [G, e], mv: [[3, 4], [5, 4], [4, 3]], cp: [[4, 5]], cap: 'Đứng ở hàng biên giới, Gấu được ăn quân.' },
+    { const G = P('G', 'R', 4, 4), e = P('L', 'B', 4, 5), g6 = P('G', 'R', 6, 4), en = P('L', 'B', 5, 5), t = P('T', 'R', 6, 0), lnT = row(6, 1, 3);
+      const near = not(ring(6, 4, 1), [5, 5]);
+      SC.G = [{ p: [G], mv: ring(4, 4, 1), cap: 'Gấu đi 1 ô theo 8 hướng: ngang, dọc và cả chéo.' },
+        { p: [G, e], mv: not(ring(4, 4, 1), [4, 5]), cp: [[4, 5]], cap: 'Đứng ở hàng biên giới, Gấu được ăn quân.' },
         { p: [P('G', 'R', 4, 5)], f: [4, 4], a: [4, 5], x: [[4, 5]], cap: 'Gấu ăn quân ngay trên hàng biên giới.' },
-        { p: [P('G', 'R', 6, 4), P('L', 'B', 5, 4)], mv: [[7, 4], [6, 3], [6, 5]], bad: [[5, 4]], cap: 'Rời biên giới: Gấu không thể ăn (và cũng không thể bị bắt).' }]; }
+        { p: [g6, en], mv: near, bad: [[5, 5]], cap: 'Rời biên giới: Gấu không thể ăn (và cũng không thể bị bắt).' },
+        { p: [g6, en, t], sp: [[6, 4], [6, 0]], ln: lnT, mv: near, cp: [[5, 5]], cap: 'Thuật cùng hàng/cột hỗ trợ: Gấu ăn được ở mọi nơi, kể cả ăn chéo.' },
+        { p: [P('G', 'R', 5, 5), t], f: [6, 4], a: [5, 5], x: [[5, 5]], cap: 'Gấu được hỗ trợ ăn quân dù đang đứng ngoài biên giới.' },
+        { p: [P('G', 'R', 2, 4), P('T', 'R', 7, 4), P('L', 'B', 1, 3), P('L', 'B', 2, 5), P('L', 'B', 3, 3)], sp: [[2, 4], [7, 4]], ln: [[3, 4], [4, 4], [5, 4], [6, 4]],
+          mv: not(ring(2, 4, 1), [1, 3], [2, 5], [3, 3]), cp: [[1, 3], [2, 5], [3, 3]], cap: 'Sang lãnh thổ địch với Thuật cùng cột: Gấu vừa bất tử vừa ăn được — một cỗ máy hủy diệt.' },
+        { p: [g6, P('G', 'B', 5, 5), t], sp: [[6, 4], [6, 0]], ln: lnT, mv: near, bad: [[5, 5]], cap: 'Nhưng Thuật không làm yếu Gấu địch: ngoài biên giới nó vẫn bất tử, phải chờ nó bước vào hàng biên giới.' }]; }
     { const N = P('N', 'R', 6, 4), blk = P('L', 'R', 5, 4), e = P('L', 'B', 6, 6), all = [N, blk, e];
       SC.N = [{ p: [N], ...slide([N], N, D4, 2), cap: 'Ngưu đi tối đa 2 ô ngang hoặc dọc.' },
         { p: all, ...slide(all, N, D4, 2), cap: 'Không xuyên qua quân khác; ăn quân ở ô đến hợp lệ.' },
@@ -2274,12 +2297,12 @@
       M: ['Mã', ['Quân trượt xa.', 'Đi nhiều ô theo đường thẳng (ngang, dọc, chéo), không xuyên quân.', 'Ăn quân tại ô đến hợp lệ.', 'Cùng hàng/cột với Ngưu → Đường Cấm.']],
       C: ['Cận', ['Quân trượt xa.', 'Đi nhiều ô theo đường thẳng (ngang, dọc, chéo), không xuyên quân.', 'Ăn quân tại ô đến hợp lệ.']],
       S: ['Sói', ['Quân nhảy.', 'Đi trong vùng 5×5, nhảy qua quân khác.', 'Thường chỉ ăn quân cách đúng 2 ô (theo hàng/cột lớn nhất).', 'Có Thuật hỗ trợ: ăn mọi ô hợp lệ trong vùng.']],
-      G: ['Gấu', ['Quân biên giới.', 'Đi 1 ô ngang hoặc dọc.', 'Chỉ ăn và chỉ bị ăn khi đứng ở hàng biên giới.']],
+      G: ['Gấu', ['Quân biên giới.', 'Đi 1 ô theo 8 hướng: ngang, dọc, chéo.', 'Trên hàng biên giới: ăn được và bị ăn được.', 'Ngoài biên giới: bất tử, chỉ ăn được khi có Thuật hỗ trợ (cùng hàng/cột).', 'Thuật không gỡ bất tử của Gấu địch: phải chờ nó vào biên giới.']],
       N: ['Ngưu', ['Quân tiến nhanh.', 'Đi tối đa 2 ô ngang hoặc dọc, không xuyên quân.', 'Ăn quân tại ô đến hợp lệ.', 'Phối hợp với Mã tạo Đường Cấm.']],
       T: ['Thuật', ['Quân hỗ trợ.', 'Đi 1 ô ngang hoặc dọc, chỉ trong lãnh thổ phe mình.', 'Hai Thuật cùng hàng/cột = Cặp Thuật (Thuật được ăn quân).', 'Một Thuật bị bắt → Thuật còn lại bị loại.', 'Hỗ trợ đồng minh cùng hàng/cột.']]
     };
-    const LS = { FB: ['Đường Cấm', ['Mã và Ngưu cùng hàng/cột → các ô giữa là Đường Cấm.', 'Đối phương không đi vào hay xuyên qua được.']], BG: ['Biên giới Gấu', ['Ngoài biên giới: Gấu không ăn, không bị ăn.', 'Trên biên giới: ăn được và bị ăn được.']],
-      PT: ['Cặp Thuật', ['Hai Thuật cùng hàng/cột cho phép Thuật ăn quân.', 'Một Thuật bị bắt → Thuật còn lại cũng bị loại.']], SUP: ['Thuật hỗ trợ', ['Hỗ trợ đồng minh cùng hàng/cột.', 'Không tăng phạm vi di chuyển.']],
+    const LS = { FB: ['Đường Cấm', ['Mã và Ngưu cùng hàng/cột → các ô giữa là Đường Cấm.', 'Đối phương không đi vào hay xuyên qua được.']], BG: ['Biên giới Gấu', ['Ngoài biên giới: Gấu bất tử; chỉ ăn được khi có Thuật hỗ trợ.', 'Trên biên giới: ăn được và bị ăn được.']],
+      PT: ['Cặp Thuật', ['Hai Thuật cùng hàng/cột cho phép Thuật ăn quân.', 'Một Thuật bị bắt → Thuật còn lại cũng bị loại.']], SUP: ['Thuật hỗ trợ', ['Hỗ trợ đồng minh cùng hàng/cột.', 'Không tăng phạm vi di chuyển.', 'Gấu được hỗ trợ ăn được cả ngoài biên giới (vẫn bất tử).']],
       SW: ['Đổi chỗ Vua–Thuật', ['Vua và Thuật cùng phe hoán đổi vị trí.', 'Không hợp lệ nếu Thuật ra ngoài lãnh thổ hoặc Vua vẫn bị chiếu.']] };
     const cnt = () => { const m = {}; startPieces().filter((p) => p.s === 'red').forEach((p) => { m[p.t] = (m[p.t] || 0) + 1; }); return Object.keys(PI).filter((k) => m[k]).map((k) => PI[k][0] + ' ×' + m[k]).join(', '); };
     const GS = [
