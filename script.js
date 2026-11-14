@@ -458,7 +458,7 @@
         const a = mk([['P2', 'G', 4, 4], ['P1', 'L', 4, 5]]), b = mk([['P2', 'G', 5, 4], ['P1', 'L', 4, 4]]);
         return has(mv(a, 'P2-G1'), 4, 5, 'capture') && !has(mv(b, 'P2-G1'), 4, 4, 'capture');
       });
-      t('Gấu bất tử ngoài biên (kể cả có Thuật hỗ trợ)', () => {
+      t('Gấu luôn bất tử ngoài biên', () => {
         const a = mk([['P2', 'M', 6, 4], ['P1', 'G', 2, 4]]);
         const b = mk([['P2', 'L', 3, 4], ['P1', 'G', 2, 4], ['P2', 'T', 3, 0]]);
         return !has(mv(a, 'P2-M1'), 2, 4) && !has(mv(b, 'P2-L1'), 2, 4, 'capture');
