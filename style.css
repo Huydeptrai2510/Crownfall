@@ -478,3 +478,16 @@ body[data-motion="reduced"] .spin-slow, body[data-motion="reduced"] .loader { an
 .gd-bar { height: 4px; border-radius: 2px; background: rgba(255,255,255,.1); overflow: hidden; margin: .5rem 0; }
 .gd-bar i { display: block; height: 100%; width: 0; background: var(--gold-2); transition: width .6s ease; }
 .cell .gd-ghost { position: absolute; inset: 7%; width: auto; height: auto; z-index: 2; }
+
+/* ===== FIX-2026-11-14: lưới bàn cờ rõ hơn + chấm ô đi luôn nằm giữa ô ===== */
+.board .cell { border: 1px solid rgba(93, 255, 176, .24); }
+.board .cell.terr-border { border-color: rgba(93, 255, 176, .42); }
+/* Ô nước đi gần nhất khi bật tọa độ: phủ cả ô, chữ tọa độ nằm trong */
+.board.show-co .cell.last::before { top: 0; left: 0; padding: 1px 0 0 3px; }
+/* Chấm xanh ô đi: trước đây bị rule tọa độ (show-co) kéo lên góc trái-trên */
+.board .cell.t-move::before,
+.board.show-co .cell.t-move::before {
+  content: ""; position: absolute; top: 50%; left: 50%; right: auto; bottom: auto;
+  width: 26%; height: 26%; padding: 0; transform: translate(-50%, -50%); border-radius: 50%;
+  background: var(--gold-2); box-shadow: 0 0 12px var(--gold-2); z-index: 3; pointer-events: none;
+}
