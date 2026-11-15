@@ -1,0 +1,19 @@
+/* CROWNFALL — bots.css (bổ sung; bám phong cách neon hiện tại) */
+.bot-tag { display: inline-block; padding: .05rem .5rem; border-radius: 6px; font-size: .7rem; font-weight: 800; letter-spacing: .08em; color: #02140c; background: var(--amber); box-shadow: 0 0 10px rgba(255,210,63,.45); flex: none; }
+.bt-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; margin: 1rem 0; }
+.bot-card { display: flex; flex-direction: column; gap: .6rem; margin-bottom: 0; }
+.bot-card .btn { margin-top: auto; align-self: flex-start; }
+.bot-head { display: flex; align-items: center; gap: .6rem; font-size: 1.1rem; }
+textarea.code-area { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .85rem; line-height: 1.4; white-space: pre; overflow: auto; tab-size: 2; }
+#ad-bots .panel { margin-bottom: 1rem; }
+.q-phase { min-height: 1.5em; color: var(--gold-2); }
+.q-radar { position: relative; width: 96px; height: 96px; margin: 0 auto; }
+.q-radar i { position: absolute; inset: 0; border-radius: 50%; border: 2px solid var(--gold-2); opacity: 0; animation: qping 2.4s ease-out infinite; box-shadow: 0 0 14px rgba(25,230,140,.5); }
+.q-radar i:nth-child(2) { animation-delay: .8s; } .q-radar i:nth-child(3) { animation-delay: 1.6s; }
+.q-radar::after { content: ""; position: absolute; left: 50%; top: 50%; width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 50%; background: var(--gold-2); box-shadow: 0 0 16px var(--gold-2); }
+@keyframes qping { 0% { transform: scale(.15); opacity: .9; } 100% { transform: scale(1); opacity: 0; } }
+.q-found { animation: rise .3s ease both; border-color: var(--gold); box-shadow: 0 0 30px rgba(25,230,140,.35); }
+.q-found-name { font-size: 1.2rem; font-weight: 700; color: var(--gold-2); }
+.op-row .bot-tag { margin-right: .1rem; }
+body[data-motion="reduced"] .q-radar i { animation: none; opacity: .5; }
+@media (prefers-reduced-motion: reduce) { .q-radar i { animation: none; opacity: .5; } }
