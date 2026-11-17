@@ -1,0 +1,38 @@
+/* CROWNFALL — ui.css — hệ thống thiết kế (nạp SAU style.css). Chỉ chỉnh kích thước/typography/bảng xếp hạng/header. */
+:root { --muted: #93bba9; }
+html { font-size: 90%; }                       /* ~ -10% chữ, nút, icon (mọi giá trị rem/em) */
+body { line-height: 1.5; }
+h1 { font-size: clamp(1.35rem, 2.4vw + .7rem, 1.9rem); }
+h2 { font-size: 1.05rem; }
+.eyebrow { font-size: .72rem; }
+.page-head { margin-bottom: 1rem; }
+.panel { padding: 1.05rem; }
+.btn { min-height: 40px; padding: .5rem 1.05rem; font-size: .95rem; }
+.btn-sm { min-height: 34px; padding: .3rem .8rem; font-size: .85rem; }
+input[type="text"], input[type="email"], input[type="password"], input[type="url"], textarea, select { min-height: 40px; }
+.nav a { min-height: 40px; padding: .4rem .75rem; }
+.top-actions a { width: 40px; height: 40px; }
+.brand-name { font-size: 1.15rem; }
+.stat strong { font-size: 1.8rem; }
+
+/* Bảng xếp hạng: luôn thấy đủ HELO, không cuộn ngang */
+#screen-ranking .tbl-wrap { overflow-x: visible; }
+#rk-table { width: 100%; table-layout: auto; }
+#rk-table th, #rk-table td { padding: .5rem .5rem; white-space: nowrap; }
+#rk-table td.who { display: table-cell; width: 100%; max-width: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+#rk-table td.who .avatar-sm { display: inline-grid; vertical-align: middle; width: 28px; height: 28px; margin-right: .5rem; }
+#rk-table td.who a { vertical-align: middle; font-weight: 700; }
+.who-name { margin-left: .45rem; color: var(--muted); font-size: .8rem; vertical-align: middle; }
+#rk-table .tier { gap: .3rem; }
+#rk-table .tier-img { width: 22px; height: 22px; }
+#rk-table tbody tr.me td { background: rgba(25,230,140,.12); }
+@media (max-width: 640px) {
+  #rk-table th, #rk-table td { padding: .45rem .35rem; }
+  #rk-table .tier-img { display: none; }
+  #rk-table .tier { font-size: .72rem; padding: .1rem .45rem; }
+  #rk-table td.who .avatar-sm { width: 24px; height: 24px; margin-right: .35rem; }
+  .who-name { display: none; }
+  #screen-ranking .panel { padding: .7rem; }
+}
+.u-link { font-weight: 700; text-decoration: none; }
+.u-link:hover { text-decoration: underline; }

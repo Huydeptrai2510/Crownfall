@@ -10,6 +10,9 @@
 <meta name="description" content="Crownfall">
 <title>Crownfall</title>
 <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="ui.css">
+<link rel="stylesheet" href="fx.css">
+<link rel="stylesheet" href="hub.css">
 </head>
 <body data-motion="full">
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
@@ -56,7 +59,6 @@
 
 <header id="topbar" class="topbar" hidden>
   <a class="brand" href="#/home" aria-label="Crownfall — Trang chủ">
-    <svg class="ico brand-mark" aria-hidden="true"><use href="#i-crown"/></svg>
     <span id="brand-logo" class="brand-logo" data-slot="logo"></span>
     <span class="brand-name">Crownfall</span>
   </a>
@@ -139,10 +141,10 @@
     </div>
   </section>
 
-  <!-- HOME -->
+  <!-- HOME / ESPORTS HUB -->
   <section id="screen-home" class="screen" hidden>
     <div class="page-head">
-      <p class="eyebrow">Sảnh chỉ huy</p>
+      <p class="eyebrow">Esports Hub</p>
       <h1 id="home-greeting">Xin chào</h1>
     </div>
 
@@ -152,29 +154,43 @@
       <div class="panel stat"><span class="stat-label">Bạn bè</span><strong id="home-friends">—</strong></div>
     </div>
 
-    <div class="grid two">
-      <div class="panel">
+    <div class="panel home-actions">
+      <div>
         <h2>Chiến trường</h2>
-        <p class="muted">Ghép trận xếp hạng với người lạ, mở phòng riêng hoặc chơi cùng bạn bè. Muốn chơi chung một máy? Có chế độ riêng.</p>
-        <div class="row">
-          <button id="btn-modes" class="btn btn-gold" type="button"><svg class="ico" aria-hidden="true"><use href="#i-swords"/></svg>Chơi trực tuyến</button>
-          <button id="btn-play" class="btn btn-ghost" type="button"><svg class="ico" aria-hidden="true"><use href="#i-pawn"/></svg>Chơi 1 máy</button>
-        </div>
+        <p class="muted">Ghép trận xếp hạng, mở phòng riêng, chơi cùng bạn bè hoặc luyện tập với BOT.</p>
       </div>
-      <div class="panel">
-        <h2>Bạn bè</h2>
+      <div class="row">
+        <button id="btn-modes" class="btn btn-gold" type="button"><svg class="ico" aria-hidden="true"><use href="#i-swords"/></svg>Chơi trực tuyến</button>
+        <button id="btn-play" class="btn btn-ghost" type="button"><svg class="ico" aria-hidden="true"><use href="#i-pawn"/></svg>Chơi 1 máy</button>
+      </div>
+    </div>
+
+    <div id="hub" class="hub">
+      <section class="panel hub-feat">
+        <div class="hub-h"><h2>Featured Matches</h2><span class="muted small">Trận Ranked gần đây của người chơi hạng cao</span></div>
+        <div id="hub-feat" class="hub-body"></div>
+      </section>
+      <section class="panel hub-live">
+        <div class="hub-h"><h2><span class="live-dot" aria-hidden="true"></span>Live Matches</h2></div>
+        <div id="hub-live" class="hub-body"></div>
+      </section>
+      <section class="panel hub-bots">
+        <div class="hub-h"><h2>Bot Suggestions</h2><a class="small" href="#/bots">Tất cả BOT</a></div>
+        <div id="hub-bots" class="hub-body"></div>
+      </section>
+      <section class="panel hub-explore">
+        <div class="hub-h"><h2>Explore</h2></div>
+        <div id="hub-explore" class="hub-body"></div>
+      </section>
+      <section class="panel hub-comm">
+        <div class="hub-h"><h2>Community</h2><span class="muted small">Bạn bè</span></div>
         <ul id="friends-list" class="list" hidden></ul>
         <div id="friends-empty" class="empty" hidden>
           <p><strong>Chưa có đồng minh nào</strong></p>
           <p class="muted">Danh sách bạn bè trống. Hãy kết bạn bằng tên người dùng.</p>
         </div>
         <div class="row"><button id="btn-friends-link" class="btn btn-ghost" type="button"><svg class="ico" aria-hidden="true"><use href="#i-users"/></svg>Quản lý bạn bè</button></div>
-      </div>
-    </div>
-
-    <div class="panel">
-      <h2>Binh đoàn</h2>
-      <div id="roster" class="roster"></div>
+      </section>
     </div>
   </section>
 
@@ -222,7 +238,7 @@
         </div>
         <div class="panel"><h2>Quân đã chọn</h2><div id="piece-info"></div></div>
         <div class="panel"><h2>Lịch sử nước đi</h2><ol id="history" class="history"></ol></div>
-        <p class="legend small muted">Chấm xanh: ô đi · viền đỏ: bắt được · vàng: đổi Vua–Thuật · sọc: Đường Cấm · quầng vàng: được Thuật hỗ trợ.</p>
+        <p class="legend small muted">Chấm xanh: ô đi · viền đỏ: bắt được · vàng: đổi Vua–Thuật · sọc: Đường Cấm · quầng vàng cam xoay: được Thuật hỗ trợ.</p>
       </aside>
     </div>
   </section>
@@ -494,5 +510,7 @@
 
 <script src="script.js" defer></script>
 <script src="bots.js" defer></script>
+<script src="fx.js" defer></script>
+<script src="hub.js" defer></script>
 </body>
 </html>

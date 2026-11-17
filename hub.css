@@ -1,0 +1,49 @@
+/* CROWNFALL — hub.css — Esports Hub (Sảnh) + khu "Trận hiện tại" ở hồ sơ người chơi */
+.home-actions { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+.home-actions p { margin: 0; } .home-actions .row { margin: 0; }
+.hub { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 1rem; margin-bottom: 1rem; }
+.hub > .panel { margin: 0; min-width: 0; }
+.hub-feat { grid-column: span 8; } .hub-live { grid-column: span 4; }
+.hub-bots { grid-column: span 7; } .hub-explore { grid-column: span 5; }
+.hub-comm { grid-column: span 12; }
+.hub-h { display: flex; align-items: baseline; justify-content: space-between; gap: .6rem; margin-bottom: .7rem; flex-wrap: wrap; }
+.hub-h h2 { margin: 0; display: flex; align-items: center; gap: .5rem; }
+.hub-body .empty { padding: .8rem; }
+.live-dot { width: .6rem; height: .6rem; border-radius: 50%; background: #ff4d6a; box-shadow: 0 0 10px #ff4d6a; animation: pulse 1.4s ease-in-out infinite; }
+
+/* Featured: một trận lớn + hai trận nhỏ */
+.fm-list { display: grid; grid-template-columns: 1.4fr 1fr; gap: .8rem; }
+.fm-card { display: flex; flex-direction: column; gap: .5rem; padding: .9rem; border-radius: 12px; border: 1px solid rgba(25,230,140,.25); background: linear-gradient(135deg, rgba(25,230,140,.10), rgba(8,16,14,.9) 60%); }
+.fm-hero { grid-row: span 2; justify-content: center; border-color: rgba(25,230,140,.55); box-shadow: 0 0 22px rgba(25,230,140,.18); }
+.fm-vs { display: flex; align-items: center; justify-content: center; gap: .7rem; flex-wrap: wrap; font-weight: 800; }
+.fm-hero .fm-vs { font-size: 1.25rem; } .fm-vs .vs { color: var(--muted); font-size: .8em; letter-spacing: .2em; }
+.fm-meta { display: flex; gap: .4rem; align-items: center; flex-wrap: wrap; justify-content: center; }
+.fm-card .row { justify-content: center; margin-top: .2rem; }
+
+/* Live */
+.lv-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .5rem; }
+.lv-row { display: flex; align-items: center; gap: .6rem; padding: .55rem .7rem; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); }
+.lv-row .grow { display: flex; flex-direction: column; min-width: 0; }
+
+/* Bots */
+#hub-bots .bt-grid { grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); margin: 0; }
+#hub-bots .bot-card { padding: .8rem; }
+
+/* Explore */
+.ex-list { list-style: none; margin: 0 0 .8rem; padding: 0; }
+.ex-list li { display: flex; align-items: center; gap: .6rem; padding: .4rem 0; border-bottom: 1px solid var(--line); }
+.ex-rank { width: 1.6rem; color: var(--gold-2); font-weight: 800; }
+.ex-links { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .4rem; }
+.ex-links .btn { flex: 1 1 auto; }
+
+/* Hồ sơ người chơi: trận hiện tại */
+.pl-live { margin: 1rem 0; padding: .8rem; border: 1px dashed rgba(25,230,140,.4); border-radius: 12px; }
+.pl-live h2 { display: flex; align-items: center; gap: .5rem; }
+
+@media (max-width: 960px) {
+  .hub-feat, .hub-live, .hub-bots, .hub-explore, .hub-comm { grid-column: span 12; }
+}
+@media (max-width: 640px) {
+  .fm-list { grid-template-columns: 1fr; } .fm-hero { grid-row: auto; }
+  .home-actions .row .btn { flex: 1 1 100%; }
+}
