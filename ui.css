@@ -36,3 +36,30 @@ input[type="text"], input[type="email"], input[type="password"], input[type="url
 }
 .u-link { font-weight: 700; text-decoration: none; }
 .u-link:hover { text-decoration: underline; }
+
+/* ===== Điều khiển: ô chọn (select), công tắc, thanh trượt, nút chọn ảnh ===== */
+select { appearance: none; -webkit-appearance: none; cursor: pointer; padding-right: 2.4rem; border-radius: 10px; color: var(--text);
+  background-color: #050c0a; background-repeat: no-repeat; background-position: right .8rem center; background-size: 14px;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235dffb0' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'><path d='M6 9l6 6 6-6'/></svg>");
+  transition: border-color .15s, box-shadow .15s, background-color .15s; }
+select:hover { border-color: rgba(25,230,140,.6); background-color: #07130f; }
+select option { background: #08100f; color: var(--text); }
+
+.toggle input[type="checkbox"] { appearance: none; -webkit-appearance: none; flex: none; width: 42px; height: 24px; border-radius: 999px; position: relative; cursor: pointer;
+  background: #0b1512; border: 1px solid rgba(25,230,140,.35); transition: background .2s, border-color .2s, box-shadow .2s; }
+.toggle input[type="checkbox"]::after { content: ""; position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; border-radius: 50%; background: #7fa596; transition: left .2s, background .2s, box-shadow .2s; }
+.toggle input[type="checkbox"]:checked { background: rgba(25,230,140,.22); border-color: var(--gold-2); box-shadow: 0 0 10px rgba(25,230,140,.4); }
+.toggle input[type="checkbox"]:checked::after { left: 20px; background: var(--gold-2); box-shadow: 0 0 8px var(--gold-2); }
+.toggle input[type="checkbox"]:focus-visible { outline: 2px solid var(--gold-2); outline-offset: 2px; }
+
+input[type="range"].range { appearance: none; -webkit-appearance: none; height: 6px; border-radius: 3px; background: rgba(25,230,140,.2); outline: none; }
+input[type="range"].range::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--gold-2); box-shadow: 0 0 10px var(--gold-2); cursor: pointer; border: 0; }
+input[type="range"].range::-moz-range-thumb { width: 18px; height: 18px; border-radius: 50%; background: var(--gold-2); box-shadow: 0 0 10px var(--gold-2); cursor: pointer; border: 0; }
+
+/* Ảnh đại diện */
+.sr-only { position: absolute !important; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); border: 0; opacity: 0; pointer-events: none; }
+.field input[type="file"] { padding: .45rem; border: 1px dashed rgba(25,230,140,.4); border-radius: 10px; background: rgba(25,230,140,.04); color: var(--muted); width: 100%; }
+.field input[type="file"]::file-selector-button { margin-right: .7rem; padding: .4rem .9rem; border: 0; border-radius: 8px; cursor: pointer; font: 700 .85rem var(--font-ui); color: #02140c; background: linear-gradient(180deg, #5dffb0, #19e68c); }
+#pf-avatar { width: 84px; height: 84px; border-color: var(--gold-2); box-shadow: 0 0 18px rgba(25,230,140,.35); }
+#pf-avatar-clear { margin-top: .5rem; }
+.field .btn + small { margin-top: .5rem; }

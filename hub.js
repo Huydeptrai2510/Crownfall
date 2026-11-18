@@ -133,21 +133,48 @@
     });
   };
 
-  /* ---------- @username bấm được (bạn bè, phòng chờ, bảng xếp hạng) ---------- */
+  /* ---------- @username bấm được; danh sách chỉ hiện @username (bỏ tên hiển thị + nút "Hồ sơ") ---------- */
   const SEL = '#friends-list span, #fr-list .grow, #fr-requests .grow, #fr-invites .grow, #lb-players .lb-name span, #lb-friends .grow';
+  const KEEP = 'Đã gửi lời mời kết bạn tới ';
   function linkify() {
     $$(SEL).forEach((s) => {
       if (s.children.length) return;
       const m = /^([\s\S]*?)\(@([a-z0-9_]{3,20})\)([\s\S]*)$/.exec(s.textContent); if (!m) return;
       const a = el('a', { href: '#/player?u=' + encodeURIComponent(m[2]), class: 'u-link', text: '@' + m[2] });
-      s.textContent = ''; s.append(m[1], a, m[3]);
+      s.textContent = ''; s.append(m[1].startsWith(KEEP) ? KEEP : '', a, m[3].replace(/\s*\(\d+ giây\/lượt\)/, ''));
     });
     $$('#rk-body td.who a').forEach((a) => {
       const m = /^(.*) \(@([a-z0-9_]+)\)$/.exec(a.textContent); if (!m) return;
-      a.textContent = '@' + m[2]; a.classList.add('u-link'); a.after(el('span', { class: 'who-name', text: m[1] }));
+      a.textContent = '@' + m[2]; a.classList.add('u-link');
     });
+    $$('#fr-list button').forEach((b) => { if (b.textContent.trim() === 'Hồ sơ') b.remove(); });
   }
   let queued = false;
   const main = $('#main');
   if (main) new MutationObserver(() => { if (!queued) { queued = true; requestAnimationFrame(() => { queued = false; linkify(); }); } }).observe(main, { childList: true, subtree: true });
+
+  /* ---------- Thời gian mỗi lượt luôn là 90 giây (bỏ mọi lựa chọn) ---------- */
+  const TURN = 90;
+  const oCall = Rpc.call;
+  Rpc.call = function (name, args) {
+    if (args && Object.prototype.hasOwnProperty.call(args, 'p_turn_seconds')) args = Object.assign({}, args, { p_turn_seconds: TURN });
+    return oCall.call(this, name, args);
+  };
+  const hideField = (n) => { if (!n) return; n.value = String(TURN); const l = n.closest('label'); if (l) l.hidden = true; };
+  hideField($('#bt-turn'));                                   // màn luyện tập với BOT (bots.js)
+  const Modal = C.Multiplayer.Modal, oOpen = Modal.open;       // hộp thoại "Tạo phòng riêng"
+  Modal.open = function () { const p = oOpen.apply(this, arguments); hideField(document.getElementById('cr-turn')); return p; };
+  const oAR = Admin.render;                                    // Boss: chỉ còn 90 giây cho trận Ranked mới
+  Admin.render = function () {
+    oAR.apply(this, arguments);
+    const sel = $('#cfg-turn'); if (sel) { sel.replaceChildren(el('option', { value: String(TURN), text: TURN + ' giây / lượt', selected: '' })); sel.value = String(TURN); }
+  };
+
+  /* ---------- Nút chọn ảnh đại diện đẹp hơn (input gốc vẫn dùng để chọn, logic cũ giữ nguyên) ---------- */
+  const fileIn = $('#pf-avatar-file');
+  if (fileIn && !fileIn.dataset.styled) {
+    fileIn.dataset.styled = '1'; fileIn.classList.add('sr-only');
+    const pick = el('button', { type: 'button', class: 'btn btn-gold btn-sm', text: 'Chọn ảnh từ thiết bị' });
+    pick.addEventListener('click', () => fileIn.click()); fileIn.before(pick);
+  }
 })();

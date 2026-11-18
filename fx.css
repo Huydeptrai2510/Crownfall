@@ -1,4 +1,5 @@
-/* CROWNFALL — fx.css — hiệu ứng quân cờ (ăn quân, di chuyển, buff). Chỉ dùng CSS/SVG, không thư viện. */
+/* CROWNFALL — fx.css — hiệu ứng quân cờ (ăn quân, di chuyển, buff, Đường Cấm). Chỉ CSS/SVG, không thư viện. */
+.board { position: relative; }
 .fx-layer { position: absolute; inset: 0; z-index: 8; pointer-events: none; overflow: hidden; border-radius: 12px; }
 .fx-spot { position: absolute; width: 11.111%; aspect-ratio: 1; transform: translate(-50%, -50%); pointer-events: none; }
 .fx-spot svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
@@ -7,11 +8,17 @@
 .fx-swords svg { filter: drop-shadow(0 0 6px rgba(93,255,176,.8)); animation: fx-swords .7s ease-out both; }
 @keyframes fx-swords { 0% { transform: scale(.08) rotate(-12deg); opacity: 1; } 55% { transform: scale(1) rotate(0); opacity: 1; } 100% { transform: scale(1.18); opacity: 0; } }
 
-/* Vua — hạt sáng / ngôi sao nhỏ */
-.fx-stars i { position: absolute; left: 50%; top: 50%; font-style: normal; line-height: 1; font-size: calc(var(--cw) * .26 * var(--s));
-  color: #ffe27a; text-shadow: 0 0 6px #ffd23f, 0 0 12px rgba(255,210,63,.6); opacity: 0; animation: fx-star .9s ease-out var(--t) both; }
-@keyframes fx-star { 0% { transform: translate(-50%, -50%) scale(.2); opacity: 0; } 20% { opacity: 1; }
-  100% { transform: translate(calc(-50% + var(--dx) * var(--cw)), calc(-50% + var(--dy) * var(--cw))) scale(1) rotate(140deg); opacity: 0; } }
+/* Vua — lóa sáng, tia chữ thập và hạt sáng */
+.fx-stars .flare { position: absolute; inset: -40%; border-radius: 50%; mix-blend-mode: screen; opacity: 0;
+  background: radial-gradient(circle, #fff 0, #fff8cc 20%, rgba(255,214,80,.75) 42%, rgba(255,180,40,.25) 62%, transparent 72%); animation: fx-flare .85s ease-out both; }
+@keyframes fx-flare { 0% { transform: scale(.2); opacity: 0; } 14% { opacity: 1; transform: scale(.85); } 100% { transform: scale(1.8); opacity: 0; } }
+.fx-stars .cross { position: absolute; inset: -70%; mix-blend-mode: screen; opacity: 0; filter: drop-shadow(0 0 6px #fff) drop-shadow(0 0 12px #ffd23f);
+  background: linear-gradient(#fff, #fff) center / 100% 3% no-repeat, linear-gradient(#fff, #fff) center / 3% 100% no-repeat; animation: fx-cross .9s ease-out both; }
+@keyframes fx-cross { 0% { transform: scale(.2) rotate(0); opacity: 0; } 20% { opacity: 1; } 100% { transform: scale(1) rotate(45deg); opacity: 0; } }
+.fx-stars i { position: absolute; left: 50%; top: 50%; font-style: normal; line-height: 1; font-size: calc(var(--cw) * .34 * var(--s));
+  color: #fff6c0; text-shadow: 0 0 8px #fff, 0 0 16px #ffd23f, 0 0 26px rgba(255,200,60,.85); opacity: 0; animation: fx-star 1s ease-out var(--t) both; }
+@keyframes fx-star { 0% { transform: translate(-50%, -50%) scale(.2); opacity: 0; } 18% { opacity: 1; }
+  100% { transform: translate(calc(-50% + var(--dx) * var(--cw)), calc(-50% + var(--dy) * var(--cw))) scale(1.05) rotate(160deg); opacity: 0; } }
 
 /* Mã — bùng nổ nhỏ, có độ nảy */
 .fx-burst svg { animation: fx-pop .52s cubic-bezier(.34,1.7,.64,1) both; }
@@ -19,16 +26,20 @@
 .fx-burst .b-rays line { stroke: #fff3b0; stroke-width: 5; stroke-linecap: round; }
 @keyframes fx-pop { 0% { transform: scale(.15); opacity: 1; } 55% { transform: scale(1.15); opacity: 1; } 100% { transform: scale(1.4); opacity: 0; } }
 
-/* Gấu — sóng chấn động lan tới ~3×3 ô */
-.fx-quake i { position: absolute; inset: 0; border-radius: 50%; border: 2px solid #5dffb0; opacity: 0;
-  box-shadow: 0 0 12px rgba(93,255,176,.75), inset 0 0 12px rgba(93,255,176,.35); animation: fx-ring .78s ease-out both; }
-.fx-quake i:nth-child(2) { animation-delay: .12s; } .fx-quake i:nth-child(3) { animation-delay: .24s; }
+/* Gấu — sóng chấn động màu nâu, lan tới ~3×3 ô */
+.fx-quake i { position: absolute; inset: 0; border-radius: 50%; opacity: 0; border: 2px solid #b8793a;
+  background: radial-gradient(circle, rgba(110,70,30,.05) 55%, rgba(120,76,34,.38) 100%);
+  box-shadow: 0 0 12px rgba(150,95,45,.8), inset 0 0 14px rgba(110,66,28,.55); animation: fx-ring .78s ease-out both; }
+.fx-quake i:nth-child(2) { animation-delay: .12s; border-color: #9a6430; } .fx-quake i:nth-child(3) { animation-delay: .24s; border-color: #7a4b22; }
 @keyframes fx-ring { 0% { transform: scale(.25); opacity: .95; } 100% { transform: scale(3); opacity: 0; } }
 
-/* Sói — ba vết cào */
-.fx-claws .claw { fill: none; stroke: #ff5c73; stroke-width: 5; stroke-linecap: round; stroke-dasharray: 100; stroke-dashoffset: 100;
-  filter: drop-shadow(0 0 4px #ff5c73); animation: fx-claw .62s ease-out var(--d) both; }
-@keyframes fx-claw { 0% { stroke-dashoffset: 100; opacity: 1; } 55% { stroke-dashoffset: 0; opacity: 1; } 100% { stroke-dashoffset: 0; opacity: 0; } }
+/* Sói — ba vết cào thon, chạy nhanh theo hướng đánh, có tia lửa */
+.fx-claws .sl { transform-box: fill-box; transform-origin: 0 50%; transform: scaleX(0); filter: drop-shadow(0 0 3px #ff2d55) drop-shadow(0 0 6px rgba(255,92,115,.7)); animation: fx-slash .55s cubic-bezier(.2,.8,.2,1) var(--d) both; }
+@keyframes fx-slash { 0% { transform: scaleX(0); opacity: 1; } 32% { transform: scaleX(1); opacity: 1; } 100% { transform: scaleX(1); opacity: 0; } }
+.fx-claws .flash { fill: rgba(255,255,255,.55); opacity: 0; transform-box: fill-box; transform-origin: center; animation: fx-flash .35s ease-out .05s both; }
+@keyframes fx-flash { 0% { transform: scale(.3); opacity: .9; } 100% { transform: scale(1.4); opacity: 0; } }
+.fx-claws .sp { fill: #ffb199; opacity: 0; filter: drop-shadow(0 0 3px #ff5c73); animation: fx-spark .5s ease-out var(--d) both; }
+@keyframes fx-spark { 0% { transform: translate(0, 0); opacity: 1; } 100% { transform: translate(var(--x), var(--y)); opacity: 0; } }
 
 /* Ngưu — cặp mắt phát sáng */
 .fx-eyes .eye path { fill: #ffd23f; filter: drop-shadow(0 0 6px #ffb300); }
@@ -36,27 +47,53 @@
 .fx-eyes svg { animation: fx-eyes .68s ease-out both; transform-origin: 50% 50%; }
 @keyframes fx-eyes { 0% { transform: scale(.6); opacity: 0; } 30% { transform: scale(1); opacity: 1; } 70% { transform: scale(1.15); opacity: 1; } 100% { transform: scale(1.3); opacity: 0; } }
 
-/* Cận — tia sét phân nhánh khi di chuyển */
-.fx-bolt { position: absolute; inset: 0; pointer-events: none; animation: fx-flick .42s linear both; }
-.fx-bolt svg { position: absolute; inset: 0; width: 100%; height: 100%; }
-.fx-bolt path { fill: none; stroke-linecap: round; stroke-linejoin: round; }
-.fx-bolt .glow { stroke: rgba(110,190,255,.7); stroke-width: .2; filter: drop-shadow(0 0 5px #59b0ff); }
-.fx-bolt .core { stroke: #fff; stroke-width: .06; }
-@keyframes fx-flick { 0% { opacity: 0; } 8% { opacity: 1; } 24% { opacity: .3; } 38% { opacity: 1; } 70% { opacity: .75; } 100% { opacity: 0; } }
+/* Cận — tia sét vàng nhỏ, bị cắt gọn trong ô */
+.fx-zap svg { overflow: hidden; animation: fx-flick .42s linear both; }
+.fx-zap path { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.fx-zap .glow { stroke: rgba(255,208,60,.8); stroke-width: 4.5; filter: drop-shadow(0 0 3px #ffc21a); }
+.fx-zap .core { stroke: #fff7b8; stroke-width: 1.6; }
+@keyframes fx-flick { 0% { opacity: 0; } 10% { opacity: 1; } 26% { opacity: .35; } 40% { opacity: 1; } 72% { opacity: .7; } 100% { opacity: 0; } }
 
-/* Buff — phản ánh đúng class .supported do engine (SpellSupport) bật/tắt trong BoardUI.render; hết buff là mất ngay */
-.board .cell.supported .piece {
-  background: radial-gradient(circle at 50% 28%, rgba(255,200,70,.34), rgba(255,120,20,.16) 62%, transparent), radial-gradient(circle at 35% 30%, #13261f, #040907);
-  box-shadow: 0 0 0 1px rgba(255,190,60,.6), 0 0 12px rgba(255,160,40,.5);
-}
+/* Buff — ánh "enchant" lấp lánh chạy trên HÌNH quân (mặt nạ theo ảnh PNG; --glint-mask do fx.js gắn).
+   Đổi màu: sửa các giá trị rgba() trong 2 lớp gradient bên dưới. Chỉ hiện khi engine bật .supported; hết buff là mất ngay. */
+.board .cell.supported .piece { background: radial-gradient(circle at 35% 30%, #13261f, #040907); box-shadow: none; }
+.board .cell.supported .piece img { filter: drop-shadow(0 0 3px rgba(255,190,70,.6)) brightness(1.05); }
 .board .cell.supported .piece::after {
-  content: ""; position: absolute; inset: 0; border-radius: 50%; padding: 2px; pointer-events: none; z-index: 2;
-  background: conic-gradient(from 0deg, #ffb300, rgba(255,179,0,0) 28%, #ffd23f 52%, rgba(255,138,0,0) 78%, #ff8a00);
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
-  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); mask-composite: exclude;
-  animation: fx-spin 5s linear infinite;
+  content: ""; position: absolute; inset: 0; z-index: 2; pointer-events: none; mix-blend-mode: screen; opacity: .95;
+  background:
+    linear-gradient(115deg, transparent 0 14%, rgba(255,246,190,.95) 24%, rgba(255,176,60,.9) 30%, transparent 40% 58%, rgba(255,214,110,.8) 68%, transparent 78% 100%),
+    linear-gradient(65deg, transparent 0 30%, rgba(190,120,255,.38) 42%, rgba(255,150,60,.4) 50%, transparent 62% 100%);
+  background-size: 200% 100%, 300% 100%; background-repeat: repeat;
+  animation: fx-glint 2.8s linear infinite;
 }
-@keyframes fx-spin { to { transform: rotate(360deg); } }
+.board .cell.supported .piece.has-glint::after {
+  -webkit-mask-image: var(--glint-mask); mask-image: var(--glint-mask);
+  -webkit-mask-size: contain; mask-size: contain; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; -webkit-mask-position: center; mask-position: center;
+}
+@keyframes fx-glint { from { background-position: 0 0, 150% 0; } to { background-position: 200% 0, 0 0; } }
+
+/* Đường Cấm — một khung chữ nhật liền mạch, viền gradient xanh biển nhạt ↔ trắng chuyển động */
+.board .cell.zone-p1::after, .board .cell.zone-p2::after { content: none; }
+.board .cell.g-forbid { background: none !important; box-shadow: none !important; }
+.fz { position: absolute; z-index: 0; pointer-events: none; border-radius: 9px; animation: fz-in .4s ease-out both;
+  background: linear-gradient(135deg, rgba(120,200,255,.16), rgba(255,255,255,.09) 50%, rgba(90,170,255,.16));
+  box-shadow: 0 0 14px rgba(120,200,255,.5), inset 0 0 14px rgba(170,225,255,.28); }
+.fz::before { content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 2.5px;
+  background: linear-gradient(90deg, #6fc2ff, #ffffff, #3b9bff, #e8f7ff, #6fc2ff); background-size: 200% 100%;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); mask-composite: exclude; animation: fz-flow 2.8s linear infinite; }
+.fz.fz-v::before { background: linear-gradient(180deg, #6fc2ff, #ffffff, #3b9bff, #e8f7ff, #6fc2ff); background-size: 100% 200%; animation-name: fz-flow-v; }
+.fz::after { content: ""; position: absolute; inset: 0; border-radius: inherit;
+  background: linear-gradient(100deg, transparent 35%, rgba(255,255,255,.38) 50%, transparent 65%); background-size: 250% 100%; animation: fz-shine 3.2s ease-in-out infinite; }
+.fz.fz-v::after { background: linear-gradient(190deg, transparent 35%, rgba(255,255,255,.38) 50%, transparent 65%); background-size: 100% 250%; animation-name: fz-shine-v; }
+.fz.fz-out { animation: fz-out .26s ease-in both; }
+@keyframes fz-in { from { opacity: 0; transform: scale(.96); } to { opacity: 1; transform: none; } }
+@keyframes fz-out { to { opacity: 0; transform: scale(.98); } }
+@keyframes fz-flow { from { background-position: 0 0; } to { background-position: 200% 0; } }
+@keyframes fz-flow-v { from { background-position: 0 0; } to { background-position: 0 200%; } }
+@keyframes fz-shine { 0% { background-position: 150% 0; } 100% { background-position: -50% 0; } }
+@keyframes fz-shine-v { 0% { background-position: 0 150%; } 100% { background-position: 0 -50%; } }
 
 body[data-motion="reduced"] .fx-layer { display: none; }
-@media (prefers-reduced-motion: reduce) { .fx-layer { display: none; } .board .cell.supported .piece::after { animation: none; } }
+body[data-motion="reduced"] .fz::before, body[data-motion="reduced"] .fz::after, body[data-motion="reduced"] .board .cell.supported .piece::after { animation: none; }
+@media (prefers-reduced-motion: reduce) { .fx-layer { display: none; } .fz::before, .fz::after, .board .cell.supported .piece::after { animation: none; } }
