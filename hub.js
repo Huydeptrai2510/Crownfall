@@ -147,6 +147,7 @@
       const m = /^(.*) \(@([a-z0-9_]+)\)$/.exec(a.textContent); if (!m) return;
       a.textContent = '@' + m[2]; a.classList.add('u-link');
     });
+    $$('#rk-body .tier').forEach((t) => { if (t.title) return; const s = t.querySelector(':scope > span'); if (s) t.title = s.textContent; });
     $$('#fr-list button').forEach((b) => { if (b.textContent.trim() === 'Hồ sơ') b.remove(); });
   }
   let queued = false;
@@ -177,4 +178,38 @@
     const pick = el('button', { type: 'button', class: 'btn btn-gold btn-sm', text: 'Chọn ảnh từ thiết bị' });
     pick.addEventListener('click', () => fileIn.click()); fileIn.before(pick);
   }
+
+  /* ---------- Admin/Boss: bỏ tên hiển thị, gộp cột cho gọn (chỉ đổi cách hiển thị; nút/sự kiện được DI CHUYỂN nguyên vẹn) ---------- */
+  const SIG = {
+    users: 'Username|Tên hiển thị|Role|Trạng thái|HELO|Tham gia|Thao tác', admins: 'Username|Tên hiển thị|Trạng thái|Được cấp|',
+    reports: 'Thời gian|Người báo cáo|Đối tượng|Lý do|Trận|Trạng thái|Xử lý', live: 'Chế độ|Đỏ|Xanh|Số nước|Bắt đầu|',
+    bots: 'Tên|Elo|Thuật toán|Trạng thái|Dùng cho|Trận xong/tổng|Bot thắng|'
+  };
+  const sub = (parts) => el('div', { class: 'cell-sub', text: parts.filter(Boolean).join(' · ') });
+  const kids = (td) => (td ? Array.from(td.childNodes) : []);
+  const userNode = (t) => (/^[a-z0-9_]{3,20}$/.test(t) ? Fmt.link(t, '@' + t) : el('span', { class: 'muted', text: t || '—' }));
+  const txt = (td) => (td ? td.textContent.trim() : '');
+  const BUILD = {
+    users: { heads: ['Người dùng', 'Thao tác'], row: (c) => [el('td', {}, [...kids(c[0]), sub([txt(c[2]), txt(c[3]), 'HELO ' + txt(c[4]), 'Tham gia ' + txt(c[5])])]), el('td', {}, kids(c[6]))] },
+    admins: { heads: ['Admin', ''], row: (c) => [el('td', {}, [...kids(c[0]), sub([txt(c[2]), 'Được cấp ' + txt(c[3])])]), el('td', {}, kids(c[4]))] },
+    reports: { heads: ['Báo cáo', 'Xử lý'], row: (c) => {
+      const act = el('td', {}, kids(c[6])), rb = c[4] && c[4].querySelector('button'), row = act.querySelector('.row'); if (rb && row) row.prepend(rb);
+      return [el('td', {}, [el('div', { class: 'cell-line' }, [...kids(c[1]), '→', ...kids(c[2])]), el('div', { class: 'cell-reason', text: txt(c[3]) }), sub([txt(c[0]), txt(c[5])])]), act];
+    } },
+    live: { heads: ['Trận', ''], row: (c) => [el('td', {}, [el('div', { class: 'cell-line' }, [userNode(txt(c[1])), 'vs', userNode(txt(c[2]))]), sub([txt(c[0]), txt(c[3]) + ' nước', txt(c[4])])]), el('td', {}, kids(c[5]))] },
+    bots: { heads: ['BOT', ''], row: (c) => [el('td', {}, [el('div', { class: 'cell-line' }, [el('strong', { text: txt(c[0]) }), el('span', { class: c[3].className, text: txt(c[3]) })]),
+      sub(['Elo ' + txt(c[1]), 'thuật toán ' + txt(c[2])]), sub(['Dùng cho: ' + (txt(c[4]) || '—'), 'xong/tổng: ' + txt(c[5]), 'BOT thắng: ' + txt(c[6])])]), el('td', {}, kids(c[7]))] }
+  };
+  function compactTables() {
+    $$('#ad-body table.tbl').forEach((t) => {
+      if (t.dataset.compact) return;
+      const sig = Array.from(t.querySelectorAll('thead th')).map((h) => h.textContent.trim()).join('|');
+      const key = Object.keys(SIG).find((k) => SIG[k] === sig); if (!key) return;
+      t.dataset.compact = '1'; t.classList.add('tbl-compact');
+      Array.from(t.querySelectorAll('tbody tr')).forEach((tr) => tr.replaceWith(el('tr', {}, BUILD[key].row(Array.from(tr.children)))));
+      t.querySelector('thead').replaceChildren(el('tr', {}, BUILD[key].heads.map((h) => Fmt.th(h))));
+    });
+  }
+  const adBody = $('#ad-body');
+  if (adBody) { let q2 = false; new MutationObserver(() => { if (!q2) { q2 = true; requestAnimationFrame(() => { q2 = false; try { compactTables(); } catch (e) { console.warn('[hub.js]', e); } }); } }).observe(adBody, { childList: true, subtree: true }); }
 })();

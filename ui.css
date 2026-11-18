@@ -23,13 +23,9 @@ input[type="text"], input[type="email"], input[type="password"], input[type="url
 #rk-table td.who .avatar-sm { display: inline-grid; vertical-align: middle; width: 28px; height: 28px; margin-right: .5rem; }
 #rk-table td.who a { vertical-align: middle; font-weight: 700; }
 .who-name { margin-left: .45rem; color: var(--muted); font-size: .8rem; vertical-align: middle; }
-#rk-table .tier { gap: .3rem; }
-#rk-table .tier-img { width: 22px; height: 22px; }
 #rk-table tbody tr.me td { background: rgba(25,230,140,.12); }
 @media (max-width: 640px) {
   #rk-table th, #rk-table td { padding: .45rem .35rem; }
-  #rk-table .tier-img { display: none; }
-  #rk-table .tier { font-size: .72rem; padding: .1rem .45rem; }
   #rk-table td.who .avatar-sm { width: 24px; height: 24px; margin-right: .35rem; }
   .who-name { display: none; }
   #screen-ranking .panel { padding: .7rem; }
@@ -63,3 +59,21 @@ input[type="range"].range::-moz-range-thumb { width: 18px; height: 18px; border-
 #pf-avatar { width: 84px; height: 84px; border-color: var(--gold-2); box-shadow: 0 0 18px rgba(25,230,140,.35); }
 #pf-avatar-clear { margin-top: .5rem; }
 .field .btn + small { margin-top: .5rem; }
+
+/* ===== BXH: rank hiện bằng ẢNH (tên rank ẩn, vẫn có tooltip). Không có ảnh thì tự hiện tên ===== */
+#rk-table .tier:has(.tier-img) { padding: 0; border: 0; background: none; gap: 0; }
+#rk-table .tier:has(.tier-img) > span { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+#rk-table .tier-img { display: block; width: 36px; height: 36px; filter: drop-shadow(0 0 6px rgba(25,230,140,.45)); }
+@media (max-width: 640px) { #rk-table .tier-img { width: 30px; height: 30px; } }
+
+/* ===== Admin/Boss: bảng gọn, gộp cột, không kéo ngang ===== */
+#ad-body .tbl-wrap { overflow-x: visible; }
+.tbl-compact { width: 100%; table-layout: auto; }
+.tbl-compact th, .tbl-compact td { white-space: normal; overflow-wrap: anywhere; vertical-align: top; }
+.tbl-compact td:last-child, .tbl-compact th:last-child { width: 1%; }
+.tbl-compact td:last-child .row { max-width: 11rem; justify-content: flex-end; margin: 0; }
+.tbl-compact td:last-child .btn { flex: 0 1 auto; width: auto; }
+.cell-sub { color: var(--muted); font-size: .8rem; margin-top: .1rem; }
+.cell-reason { margin: .2rem 0; }
+.cell-line { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem; }
+@media (max-width: 640px) { .tbl-compact td:last-child .btn { width: auto; flex: 0 1 auto; } .tbl-compact td:last-child .row .btn { flex: 0 1 auto; } }
