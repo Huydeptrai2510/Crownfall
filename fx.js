@@ -1,8 +1,8 @@
 /* CROWNFALL — fx.js — hiệu ứng quân cờ (nạp SAU script.js). Chỉ VẼ, không đọc/ghi trạng thái bàn cờ.
  *  Ăn quân (chỉ khi nước đi đã được engine/máy chủ xác nhận):
  *   Lính: 2 kiếm · Vua: lóa sáng + hạt sáng · Mã: bùng nổ · Gấu: sóng nâu 3×3 · Sói: 3 vết cào · Ngưu: cặp mắt
- *  Di chuyển: Cận: tia sét vàng nhỏ, nằm gọn trong ô xuất phát và ô đến.
- *  Buff (Thuật hỗ trợ): ánh "enchant" lấp lánh chạy trên hình quân (mặt nạ theo ảnh PNG), bám class .supported do engine bật.
+ *  Di chuyển: Cận: tia sét vàng kéo từ ô đi tới ô đến.
+ *  Buff (Thuật hỗ trợ): ánh bóng tím lấp lánh chạy chậm trên hình quân (mặt nạ theo ảnh PNG), bám class .supported do engine bật.
  *  Đường Cấm: một khung chữ nhật liền mạch, viền gradient xanh biển nhạt–trắng chuyển động, bám class zone-p1/zone-p2 do engine bật.
  */
 (function () {
@@ -17,8 +17,7 @@
   const flipped = () => { const b = boardEl(); return !!b && b.classList.contains('flip'); };
   const cellXY = (r, c) => { const f = flipped(); return { x: (f ? SIZE - 1 - c : c) + 0.5, y: (f ? SIZE - 1 - r : r) + 0.5 }; };
   const rnd = (a, b) => a + Math.random() * (b - a);
-  const clamp = (v) => Math.max(10, Math.min(90, v));
-
+  
   function getLayer() {
     const b = boardEl(); if (!b || !b.parentElement) return null;
     const wrap = b.parentElement;
@@ -71,19 +70,28 @@
     }
   };
 
-  /** Tia sét vàng nhỏ, tỏa ngắn quanh tâm ô: luôn nằm TRONG ô (toạ độ bị kẹp 10..90 trên khung 100). */
-  function zap(r, c, branches) {
-    let d = '';
-    for (let k = 0; k < branches; k++) {
-      const base = rnd(0, Math.PI * 2); let x = 50, y = 50; d += ' M50 50';
-      for (let s = 0; s < 3; s++) { const a = base + rnd(-0.55, 0.55), len = rnd(10, 16); x = clamp(x + Math.cos(a) * len); y = clamp(y + Math.sin(a) * len); d += ' L' + x.toFixed(1) + ' ' + y.toFixed(1); }
+  /** Tia sét phân nhánh kéo từ ô xuất phát tới ô đến (chỉ Cận, hiệu ứng DI CHUYỂN). */
+  function bolt(l) {
+    const a = cellXY(l.fromRow, l.fromCol), b = cellXY(l.toRow, l.toCol);
+    const dx = b.x - a.x, dy = b.y - a.y, len = Math.hypot(dx, dy) || 1, nx = -dy / len, ny = dx / len, segs = Math.max(5, Math.round(len * 3.2));
+    const pts = [[a.x, a.y]];
+    for (let i = 1; i < segs; i++) { const t = i / segs, o = rnd(-0.26, 0.26); pts.push([a.x + dx * t + nx * o, a.y + dy * t + ny * o]); }
+    pts.push([b.x, b.y]);
+    const f = (v) => v.toFixed(2);
+    let d = 'M' + pts.map((p) => f(p[0]) + ' ' + f(p[1])).join(' L');
+    for (let k = 0; k < 3; k++) {
+      const p = pts[1 + Math.floor(Math.random() * (pts.length - 2))], ang = Math.atan2(dy, dx) + (Math.random() < 0.5 ? -1 : 1) * rnd(0.6, 1.1), ln = rnd(0.5, 1.1);
+      const q1 = [p[0] + Math.cos(ang) * ln * 0.5 + rnd(-0.08, 0.08), p[1] + Math.sin(ang) * ln * 0.5 + rnd(-0.08, 0.08)], q2 = [p[0] + Math.cos(ang) * ln, p[1] + Math.sin(ang) * ln];
+      d += ' M' + f(p[0]) + ' ' + f(p[1]) + ' L' + f(q1[0]) + ' ' + f(q1[1]) + ' L' + f(q2[0]) + ' ' + f(q2[1]);
     }
-    spot(r, c, 'fx-zap', '<svg viewBox="0 0 100 100"><path class="glow" d="' + d + '"/><path class="core" d="' + d + '"/></svg>', 430);
+    const n = document.createElement('div'); n.className = 'fx-bolt';
+    n.innerHTML = '<svg viewBox="0 0 9 9" preserveAspectRatio="none"><path class="glow" d="' + d + '"/><path class="core" d="' + d + '"/></svg>';
+    add(n, 420);
   }
 
   function play(last) {
     if (!last || motionOff() || !boardEl()) return;
-    if (last.pieceType === 'C' && last.actionType !== 'swap') { zap(last.fromRow, last.fromCol, 3); setTimeout(() => zap(last.toRow, last.toCol, 5), 150); }
+    if (last.pieceType === 'C' && last.actionType !== 'swap') bolt(last);
     if (last.actionType === 'capture' && CAPTURE[last.pieceType]) setTimeout(() => { try { CAPTURE[last.pieceType](last.toRow, last.toCol, last); } catch (e) { console.warn('[fx.js]', e); } }, 140);
   }
 
