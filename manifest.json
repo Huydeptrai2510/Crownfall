@@ -1,0 +1,14 @@
+{
+  "name": "Crownfall",
+  "short_name": "Crownfall",
+  "description": "Crownfall",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#04070a",
+  "theme_color": "#04070a",
+  "icons": [
+    { "src": "logo.png", "sizes": "any", "type": "image/png", "purpose": "any" }
+  ]
+}
