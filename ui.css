@@ -77,3 +77,21 @@ input[type="range"].range::-moz-range-thumb { width: 18px; height: 18px; border-
 .cell-reason { margin: .2rem 0; }
 .cell-line { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem; }
 @media (max-width: 640px) { .tbl-compact td:last-child .btn { width: auto; flex: 0 1 auto; } .tbl-compact td:last-child .row .btn { flex: 0 1 auto; } }
+
+/* Fix: nút trong cột thao tác (Admin/Boss) không được tự bẻ chữ từng ký tự */
+.tbl-compact td:last-child, .tbl-compact th:last-child { overflow-wrap: normal; word-break: normal; min-width: max-content; }
+.tbl-compact .btn { white-space: nowrap; overflow-wrap: normal; word-break: normal; flex-shrink: 0; }
+.tbl-compact td:last-child .row { max-width: 12rem; }
+
+/* ===== "Barem" khung: mỗi thành phần có vùng kích thước riêng; chữ tràn thì fit.js thu nhỏ cho vừa ===== */
+:root { --act-w: 8.6rem; }
+.fit { white-space: nowrap; overflow: hidden; min-width: 0; }
+
+/* Admin/Boss: mỗi dòng = [vùng thông tin co giãn | vùng nút CỐ ĐỊNH rộng --act-w], nút xếp dọc, rộng bằng vùng */
+.tbl-compact, .tbl-compact tbody { display: block; width: 100%; }
+.tbl-compact thead { display: none; }
+.tbl-compact tr { display: grid; grid-template-columns: minmax(0, 1fr) var(--act-w); gap: .7rem; align-items: start; padding: .7rem .2rem; border-bottom: 1px solid var(--line); }
+.tbl-compact td { display: block; min-width: 0; width: auto; padding: 0; border: 0; white-space: normal; overflow-wrap: anywhere; }
+.tbl-compact td:last-child { min-width: 0; width: auto; overflow-wrap: normal; word-break: normal; }
+.tbl-compact td:last-child .row { display: grid; grid-template-columns: minmax(0, 1fr); gap: .35rem; width: 100%; max-width: none; margin: 0; }
+.tbl-compact td:last-child .btn { width: 100%; min-height: 34px; padding-left: .4rem; padding-right: .4rem; }
