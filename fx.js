@@ -1,7 +1,7 @@
 /* CROWNFALL — fx.js — hiệu ứng quân cờ (nạp SAU script.js). Chỉ VẼ, không đọc/ghi trạng thái bàn cờ.
  *  Ăn quân (chỉ khi nước đi đã được engine/máy chủ xác nhận):
  *   Lính: 2 kiếm · Vua: lóa sáng + hạt sáng · Mã: bùng nổ · Gấu: sóng nâu 3×3 · Sói: 3 vết cào · Ngưu: cặp mắt
- *  Di chuyển: Cận: tia sét vàng kéo từ ô đi tới ô đến.
+ *  Di chuyển: Cận: tia sét vàng mảnh kéo từ ô đi tới ô đến.
  *  Buff (Thuật hỗ trợ): ánh bóng tím lấp lánh chạy chậm trên hình quân (mặt nạ theo ảnh PNG), bám class .supported do engine bật.
  *  Đường Cấm: một khung chữ nhật liền mạch, viền gradient xanh biển nhạt–trắng chuyển động, bám class zone-p1/zone-p2 do engine bật.
  */
@@ -56,13 +56,33 @@
       spot(r, c, 'fx-burst', '<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="24" class="b-core"/><g class="b-rays">' + rays + '</g></svg>', 540);
     },
     G(r, c) { spot(r, c, 'fx-quake', '<i></i><i></i><i></i>', 950); },
-    S(r, c, last) {
-      const id = 'sg' + Math.floor(Math.random() * 1e6);
-      const slash = (y, d, w) => '<path class="sl" style="--d:' + d + 'ms" fill="url(#' + id + ')" d="M4 ' + (y + 12) + ' Q50 ' + (y - 18 - w) + ' 96 ' + (y + 6) + ' Q50 ' + (y - 9) + ' 4 ' + (y + 12) + 'Z"/>';
-      let sp = ''; for (let i = 0; i < 7; i++) { const a = rnd(-0.7, 0.7), d = rnd(26, 46); sp += '<circle class="sp" cx="50" cy="50" r="' + rnd(1.2, 2.4).toFixed(1) + '" style="--x:' + (Math.cos(a) * d).toFixed(0) + 'px;--y:' + (Math.sin(a) * d).toFixed(0) + 'px;--d:' + Math.round(rnd(60, 200)) + 'ms"/>'; }
-      spot(r, c, 'fx-claws', '<svg viewBox="0 0 100 100" style="transform:rotate(' + moveAngle(last).toFixed(0) + 'deg) scale(1.25)"><defs><linearGradient id="' + id + '" x1="0" x2="1">' +
-        '<stop offset="0" stop-color="#ff2d55" stop-opacity=".1"/><stop offset=".45" stop-color="#ffffff"/><stop offset=".75" stop-color="#ff5c73"/><stop offset="1" stop-color="#b3122f" stop-opacity=".2"/></linearGradient></defs>' +
-        '<circle class="flash" cx="50" cy="50" r="30"/>' + slash(26, 0, 4) + slash(50, 70, 6) + slash(74, 140, 4) + sp + '</svg>', 850);
+    /* Sói — vết cào hoang dã: 3 vết thon (đầu dày, đuôi nhọn, mép răng cưa), cong nhẹ, chém chéo rất nhanh rồi mờ dần (build-up → đỉnh → dư âm),
+       chớp va chạm + rung nhẹ, giọt máu và tia lửa văng THEO HƯỚNG chém (theo các hướng dẫn VFX: hạt kế thừa hướng và tốc độ của vệt chém). */
+    S(r, c) {
+      const id = 'sg' + Math.floor(Math.random() * 1e6), ang = 38 + rnd(-12, 12);
+      const path = (L, w, curv) => {
+        const n = 14, top = [], bot = [];
+        for (let i = 0; i <= n; i++) {
+          const t = i / n, wd = w * Math.sin(Math.PI * Math.pow(t, 0.65)) * (1 - 0.25 * t) + 0.4, cv = curv * Math.sin(Math.PI * t), j = i % 2 ? rnd(-0.7, 0.7) : 0;
+          top.push([L * t, cv - wd / 2 + j]); bot.push([L * t, cv + wd / 2 - j]);
+        }
+        return 'M' + top.concat(bot.reverse()).map((p) => p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' L') + 'Z';
+      };
+      let g = '';
+      [{ o: -17, L: 84, w: 7, cv: -3, d: 0 }, { o: 0, L: 102, w: 9, cv: -4, d: 70 }, { o: 17, L: 80, w: 6.5, cv: -3, d: 140 }].forEach((k) => {
+        const p = path(k.L, k.w, k.cv);
+        g += '<g transform="translate(' + (50 - k.L / 2).toFixed(1) + ' ' + (50 + k.o) + ')"><path class="sl gl" style="--d:' + k.d + 'ms" d="' + p + '"/>' +
+          '<path class="sl" style="--d:' + k.d + 'ms" fill="url(#' + id + ')" d="' + p + '"/><path class="sl core" style="--d:' + k.d + 'ms" d="' + path(k.L * 0.92, k.w * 0.32, k.cv) + '"/></g>';
+      });
+      let pt = '';
+      for (let i = 0; i < 16; i++) {
+        const a = ang * Math.PI / 180 + rnd(-0.6, 0.6), d = rnd(24, 54), blood = i < 10, x = Math.cos(a) * d, y = Math.sin(a) * d;
+        pt += '<circle class="' + (blood ? 'bl' : 'sk') + '" cx="50" cy="50" r="' + (blood ? rnd(1, 2.6) : rnd(0.8, 1.5)).toFixed(1) + '" style="--x:' + x.toFixed(0) + 'px;--y:' + y.toFixed(0) + 'px;--d:' + Math.round(rnd(60, 220)) + 'ms"/>';
+      }
+      spot(r, c, 'fx-claws', '<svg viewBox="0 0 100 100"><defs><linearGradient id="' + id + '" x1="0" x2="1"><stop offset="0" stop-color="#ffe3dc"/><stop offset=".28" stop-color="#ff5c6c"/>' +
+        '<stop offset=".72" stop-color="#cf1230"/><stop offset="1" stop-color="#6e0716" stop-opacity=".25"/></linearGradient>' +
+        '<radialGradient id="' + id + 'f"><stop offset="0" stop-color="#fff"/><stop offset=".4" stop-color="#ff6a7a" stop-opacity=".85"/><stop offset="1" stop-color="#ff2d55" stop-opacity="0"/></radialGradient></defs>' +
+        '<circle class="flash" cx="50" cy="50" r="30" fill="url(#' + id + 'f)"/><g transform="rotate(' + ang.toFixed(0) + ' 50 50)">' + g + '</g>' + pt + '</svg>', 900);
     },
     N(r, c) {
       spot(r, c, 'fx-eyes', '<svg viewBox="0 0 100 100"><g class="eye"><path d="M12 50 Q29 33 46 50 Q29 67 12 50Z"/><circle cx="29" cy="50" r="5"/></g>' +
@@ -70,19 +90,23 @@
     }
   };
 
-  /** Tia sét phân nhánh kéo từ ô xuất phát tới ô đến (chỉ Cận, hiệu ứng DI CHUYỂN). */
+  /** Tia sét vàng kéo từ ô xuất phát tới ô đến (chỉ Cận). Mảnh; nhánh ít, ngắn và chỉ nằm trong các ô mà đường đi thực sự đi qua. */
   function bolt(l) {
     const a = cellXY(l.fromRow, l.fromCol), b = cellXY(l.toRow, l.toCol);
     const dx = b.x - a.x, dy = b.y - a.y, len = Math.hypot(dx, dy) || 1, nx = -dy / len, ny = dx / len, segs = Math.max(5, Math.round(len * 3.2));
+    const path = new Set(); for (let i = 0; i <= 48; i++) { const t = i / 48; path.add(Math.floor(a.x + dx * t) + ',' + Math.floor(a.y + dy * t)); }
+    const inPath = (x, y) => path.has(Math.floor(x) + ',' + Math.floor(y));
     const pts = [[a.x, a.y]];
-    for (let i = 1; i < segs; i++) { const t = i / segs, o = rnd(-0.26, 0.26); pts.push([a.x + dx * t + nx * o, a.y + dy * t + ny * o]); }
+    for (let i = 1; i < segs; i++) { const t = i / segs, bx = a.x + dx * t, by = a.y + dy * t; let o = rnd(-0.2, 0.2); if (!inPath(bx + nx * o, by + ny * o)) o = 0; pts.push([bx + nx * o, by + ny * o]); }
     pts.push([b.x, b.y]);
     const f = (v) => v.toFixed(2);
     let d = 'M' + pts.map((p) => f(p[0]) + ' ' + f(p[1])).join(' L');
-    for (let k = 0; k < 3; k++) {
-      const p = pts[1 + Math.floor(Math.random() * (pts.length - 2))], ang = Math.atan2(dy, dx) + (Math.random() < 0.5 ? -1 : 1) * rnd(0.6, 1.1), ln = rnd(0.5, 1.1);
-      const q1 = [p[0] + Math.cos(ang) * ln * 0.5 + rnd(-0.08, 0.08), p[1] + Math.sin(ang) * ln * 0.5 + rnd(-0.08, 0.08)], q2 = [p[0] + Math.cos(ang) * ln, p[1] + Math.sin(ang) * ln];
-      d += ' M' + f(p[0]) + ' ' + f(p[1]) + ' L' + f(q1[0]) + ' ' + f(q1[1]) + ' L' + f(q2[0]) + ' ' + f(q2[1]);
+    const want = Math.random() < 0.5 ? 1 : 2; let made = 0;
+    for (let tries = 0; tries < 10 && made < want && pts.length > 3; tries++) {
+      const p = pts[1 + Math.floor(Math.random() * (pts.length - 2))], ang = Math.atan2(dy, dx) + (Math.random() < 0.5 ? -1 : 1) * rnd(0.7, 1.2), ln = rnd(0.16, 0.34);
+      const q1 = [p[0] + Math.cos(ang) * ln * 0.5 + rnd(-0.04, 0.04), p[1] + Math.sin(ang) * ln * 0.5 + rnd(-0.04, 0.04)], q2 = [p[0] + Math.cos(ang) * ln, p[1] + Math.sin(ang) * ln];
+      if (!inPath(q1[0], q1[1]) || !inPath(q2[0], q2[1])) continue;
+      d += ' M' + f(p[0]) + ' ' + f(p[1]) + ' L' + f(q1[0]) + ' ' + f(q1[1]) + ' L' + f(q2[0]) + ' ' + f(q2[1]); made++;
     }
     const n = document.createElement('div'); n.className = 'fx-bolt';
     n.innerHTML = '<svg viewBox="0 0 9 9" preserveAspectRatio="none"><path class="glow" d="' + d + '"/><path class="core" d="' + d + '"/></svg>';
@@ -103,12 +127,20 @@
     return r;
   };
 
-  /* ---------- Buff: gắn mặt nạ theo ảnh quân để ánh enchant chỉ chạy trên hình quân ---------- */
+  /* ---------- Buff: "chrome lỏng ánh cầu vồng" — lớp .lq (mặt nạ theo ảnh PNG) chứa các mảng màu trôi/uốn/biến dạng NGẪU NHIÊN riêng từng quân ---------- */
+  const R = (a, b) => (a + Math.random() * (b - a)).toFixed(2);
   function syncGlint(board) {
     board.querySelectorAll('.cell.supported .piece').forEach((p) => {
       const img = p.querySelector('img'), src = img && img.getAttribute('src'); if (!src) return;
       p.style.setProperty('--glint-mask', 'url("' + src.replace(/["\\\n\r]/g, '') + '")');
       if (!p.classList.contains('has-glint')) p.classList.add('has-glint');
+      if (!p.querySelector(':scope > .lq')) {
+        const q = document.createElement('span'); q.className = 'lq'; q.setAttribute('aria-hidden', 'true'); q.innerHTML = '<i></i><i></i><i></i><i></i>';
+        const d = [R(8, 14), R(10, 17), R(6, 11), R(9, 16)];
+        d.forEach((v, i) => { q.style.setProperty('--d' + (i + 1), v + 's'); q.style.setProperty('--o' + (i + 1), '-' + R(0, parseFloat(v)) + 's'); });
+        q.style.setProperty('--a0', Math.round(Math.random() * 360) + 'deg');
+        p.append(q);
+      }
     });
   }
 

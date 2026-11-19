@@ -7,10 +7,10 @@
   const C = window.Crownfall;
   if (!C || !C.Phase4 || !C.Multiplayer) { console.error('[hub.js] Cần nạp sau script.js'); return; }
   const { Utils, UI, Router, Database } = C;
-  const { Rpc } = C.Multiplayer;
+  const { Rpc, Social } = C.Multiplayer;
   const { Fmt, Ranking, Player, Admin } = C.Phase4;
   const $ = Utils.$, $$ = Utils.$$, el = Utils.el;
-  const uname = (u) => (u ? Fmt.link(u, '@' + u) : el('span', { class: 'muted', text: 'Ẩn danh' }));
+  const uname = (u) => { if (!u) return el('span', { class: 'muted', text: 'Ẩn danh' }); const a = Fmt.link(u, '@' + u); a.classList.add('u-link'); return a; };
   const empty = (t) => el('div', { class: 'empty' }, [el('p', { class: 'muted small', text: t })]);
 
   /* ---------- Dữ liệu ---------- */
@@ -100,6 +100,33 @@
       return el('li', { class: 'lv-row' }, [el('span', { class: 'live-dot', 'aria-hidden': 'true' }),
         el('div', { class: 'grow' }, [el('span', {}, [uname(m.red), ' vs ', uname(m.blue)]), el('span', { class: 'muted small', text: Fmt.mode(m.mode, m.ranked) })]), watch]);
     },
+
+    /** Hồ sơ người chơi khác: nút Kết bạn / Đã gửi lời mời / Chấp nhận / Đã là bạn bè (dùng RPC send_friend_request, respond_friend_request có sẵn). */
+    async friendBtn(boxId) {
+      const S = Player.st[boxId], box = $('#' + boxId); if (!S || !box || S.d.is_me) return;
+      try { await Social.refresh(); } catch (_) { /* dùng dữ liệu hiện có */ }
+      if (!box.isConnected) return;
+      const u = S.d.username, D = Social.data || {};
+      const isFriend = (D.friends || []).some((x) => x.username === u);
+      const out = (D.requests_out || []).find((r) => r.to && r.to.username === u), inc = (D.requests_in || []).find((r) => r.from && r.from.username === u);
+      const settle = (x, label) => { x.textContent = label; x.disabled = true; x.className = 'btn btn-ghost btn-sm'; };
+      let b;
+      if (isFriend) { b = Fmt.btn('Đã là bạn bè', 'ghost', () => {}); b.disabled = true; }
+      else if (out) { b = Fmt.btn('Đã gửi lời mời', 'ghost', () => {}); b.disabled = true; }
+      else if (inc) {
+        b = Fmt.btn('Chấp nhận kết bạn', 'gold', async (x) => { x.disabled = true;
+          try { await Rpc.call('respond_friend_request', { p_friendship: inc.id, p_accept: true }); UI.toast('Hai bạn đã là bạn bè.'); settle(x, 'Đã là bạn bè'); Social.refresh().catch(() => {}); }
+          catch (e) { UI.toast(Utils.mapError(e), true); x.disabled = false; } });
+      } else {
+        b = Fmt.btn('Kết bạn', 'gold', async (x) => { x.disabled = true;
+          try { const r = await Rpc.call('send_friend_request', { p_username: u }); const ok = r && r.status === 'accepted';
+            UI.toast(ok ? 'Hai bạn đã là bạn bè.' : 'Đã gửi lời mời kết bạn.'); settle(x, ok ? 'Đã là bạn bè' : 'Đã gửi lời mời'); Social.refresh().catch(() => {}); }
+          catch (e) { UI.toast(Utils.mapError(e), true); x.disabled = false; } });
+      }
+      b.dataset.friendBtn = '1';
+      $$('[data-friend-btn]', box).forEach((n) => n.remove());
+      const row = $('.row', box); if (row) row.prepend(b); else box.prepend(el('div', { class: 'row' }, [b]));
+    },
     /** Hồ sơ người chơi: nếu đang trong một trận thì cho theo dõi (chỉ xem — vai trò khán giả do Match/RPC kiểm soát). */
     async playerLive(boxId) {
       const box = $('#' + boxId), S = Player.st[boxId]; if (!box || !S) return;
@@ -119,7 +146,7 @@
   const oRenderHome = UI.renderHome;
   UI.renderHome = function () { oRenderHome.apply(this, arguments); try { Hub.mount(); } catch (e) { console.warn('[hub.js]', e); } };
   const oPlayerRender = Player.render;
-  Player.render = async function (boxId) { const r = await oPlayerRender.apply(this, arguments); if (boxId === 'pl-body') { try { await Hub.playerLive(boxId); } catch (e) { console.warn('[hub.js]', e); } } return r; };
+  Player.render = async function (boxId) { const r = await oPlayerRender.apply(this, arguments); if (boxId === 'pl-body') { Hub.playerLive(boxId).catch((e) => console.warn('[hub.js]', e)); Hub.friendBtn(boxId).catch((e) => console.warn('[hub.js]', e)); } return r; };
 
   /* ---------- Chỉ gỡ khung "Audit log" khỏi trang Admin/Boss (RPC, bảng log và function bảo mật ở backend giữ nguyên) ----------
    * Mọi khu khác của Admin/Boss (báo cáo, người dùng, trận đang diễn ra, cấu hình, quản lý BOT) vẫn hoạt động như cũ. */

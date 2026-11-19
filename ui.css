@@ -95,3 +95,7 @@ input[type="range"].range::-moz-range-thumb { width: 18px; height: 18px; border-
 .tbl-compact td:last-child { min-width: 0; width: auto; overflow-wrap: normal; word-break: normal; }
 .tbl-compact td:last-child .row { display: grid; grid-template-columns: minmax(0, 1fr); gap: .35rem; width: 100%; max-width: none; margin: 0; }
 .tbl-compact td:last-child .btn { width: 100%; min-height: 34px; padding-left: .4rem; padding-right: .4rem; }
+
+/* @username: MỌI liên kết tới hồ sơ người chơi dùng cùng một kiểu (Explore, bạn bè, BXH, Admin/Boss, phòng chờ…) */
+.u-link, a[href^="#/player"] { font-weight: 700; text-decoration: none; }
+.u-link:hover, a[href^="#/player"]:hover { text-decoration: underline; }
