@@ -68,7 +68,7 @@
 .board .cell.supported .piece img { filter: drop-shadow(0 0 2px rgba(200,140,255,.3)); }
 .board .cell.supported .piece:not(.has-glint) { box-shadow: 0 0 6px rgba(190,120,255,.3); }
 .board .cell:not(.supported) .lq { display: none; }
-.lq { position: absolute; inset: 0; z-index: 2; pointer-events: none; overflow: hidden; border-radius: 50%; opacity: .35; contain: paint;
+.lq { position: absolute; inset: 0; z-index: 2; pointer-events: none; overflow: hidden; border-radius: 50%; opacity: .50; contain: paint;
   background: linear-gradient(var(--a0, 135deg), #4a22c9, #b447d6 42%, #ff79cf 72%, #6f56ff);
   -webkit-mask-image: var(--glint-mask); mask-image: var(--glint-mask); -webkit-mask-size: contain; mask-size: contain;
   -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; -webkit-mask-position: center; mask-position: center; }
